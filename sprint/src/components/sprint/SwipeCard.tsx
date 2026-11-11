@@ -63,11 +63,16 @@ export function SwipeCard() {
     leaving.current = true;
     const next = () => {
       if (kind === 'happy') pulse(10);
-      vote(kind);
-      x.set(0);
-      y.set(0);
-      setKey(k => k + 1);
-      leaving.current = false;
+      // Whatever goes wrong in recording the vote (browser storage full, say), the next
+      // card must still come up: otherwise the screen is left blank and stuck.
+      try { vote(kind); } finally {
+        x.set(0);
+        y.set(0);
+        setKey(k => k + 1);
+        // A double tap must not also vote on the card that has only just appeared:
+        // nobody has read it in a quarter of a second.
+        setTimeout(() => { leaving.current = false; }, 250);
+      }
     };
     // No fly-out at all with reduced motion. A zero-length animation is not the same thing:
     // it lands a frame after its promise resolves, which moved the next card off screen
@@ -130,7 +135,7 @@ export function SwipeCard() {
 
   // How this prompt is doing in the room, using the same rules as the try-it page.
   let tag: { emoji: string; label: string } | null = null;
-  if (board && !board.session.hidden) {
+  if (board && board.session && Array.isArray(board.rows) && !board.session.hidden) { // a reply that is not a board must not blank the page
     const row = board.rows.find(r => r.id === card.id);
     const buzz = row ? buzzFor(row, board.voters) : null;
     if (buzz && buzz.key === 'unloved') {

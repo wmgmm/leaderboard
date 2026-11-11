@@ -1,4 +1,5 @@
 import { applyFilter, votesOf } from '../../shared/filters';
+import { scoreOf } from '../../shared/ranking';
 import type { FilterKey } from '../../shared/filters';
 import type { Board, CommunityItem, Prompt } from '../../shared/types';
 import { el, getCommunity, getPrompts, watchBoard } from './api';
@@ -22,7 +23,7 @@ const VIEWS: { key: FilterKey; label: string; empty: string }[] = [
 ];
 
 /** One row as drawn: a prompt on the chart, or a prompt staff added themselves. */
-interface Shown { id: string; pos: number; title: string; points: number; happy: number; neutral: number; sad: number }
+interface Shown { id: string; pos: number; title: string; happy: number; neutral: number; sad: number }
 
 let view: FilterKey = VIEWS.some((v) => '#' + v.key === location.hash) ? (location.hash.slice(1) as FilterKey) : 'all';
 let board: Board | null = null;
@@ -55,9 +56,9 @@ const chartRows = () => (board ? board.rows.filter((row) => titles.has(row.id)) 
 
 function rowsToShow(): Shown[] {
   if (view === 'community') {
-    return community.map((c, i) => ({ id: `c${c.id}`, pos: i + 1, title: c.purpose, points: c.points, happy: c.happy, neutral: c.neutral, sad: c.sad }));
+    return community.map((c, i) => ({ id: `c${c.id}`, pos: i + 1, title: c.purpose, happy: c.happy, neutral: c.neutral, sad: c.sad }));
   }
-  return applyFilter(view, chartRows()).map((r) => ({ id: r.id, pos: r.rank, title: titles.get(r.id)!, points: r.points, happy: r.happy, neutral: r.neutral, sad: r.sad }));
+  return applyFilter(view, chartRows()).map((r) => ({ id: r.id, pos: r.rank, title: titles.get(r.id)!, happy: r.happy, neutral: r.neutral, sad: r.sad }));
 }
 
 // The buttons are made once and then only updated: rebuilding them on every chart update
@@ -122,7 +123,10 @@ function draw() {
     for (const f of FACES) {
       node.querySelector<HTMLElement>(`.seg[data-kind="${f.kind}"]`)!.style.width = `${(row[f.kind] / most) * 100}%`;
     }
-    node.querySelector('.pts')!.textContent = `${row.points} pts`;
+    // A percentage, not points: some prompts are shown to more people than others.
+    const score = scoreOf(row);
+    const votes = row.happy + row.neutral + row.sad;
+    node.querySelector('.pts')!.textContent = score === null ? 'No votes yet' : `${score}% \u00b7 ${votes} ${votes === 1 ? 'vote' : 'votes'}`;
     for (const f of FACES) node.querySelector(`.tally [data-kind="${f.kind}"]`)!.textContent = `${f.emoji} ${row[f.kind]}`;
     // "Up 2" and "New entry" only mean something on the full chart.
     const tag = node.querySelector('.move')!;

@@ -116,6 +116,23 @@ function showTools() {
     }));
   }
 
+  // The whole database as one file, saved by the browser. Nothing in it is personal.
+  const backup = el('button', { type: 'button', class: 'btn-copy' }, 'Download backup');
+  backup.addEventListener('click', async () => {
+    backup.disabled = true;
+    try {
+      const all = await call<{ exported_at: string; reactions: unknown[]; reactions_archive: unknown[] }>('/api/facilitator/export');
+      const link = el('a', {
+        href: URL.createObjectURL(new Blob([JSON.stringify(all, null, 1)], { type: 'application/json' })),
+        download: `leaderboard-backup-${all.exported_at.slice(0, 16).replace(/[:T]/g, '-')}.json`,
+      });
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+      said.textContent = `Backup downloaded: ${all.reactions.length} votes on the chart, ${all.reactions_archive.length} cleared.`;
+    } catch (err) { said.textContent = (err as Error).message; }
+    backup.disabled = false;
+  });
+
   async function refresh() {
     refreshWaiting();
     let items: CommunityItem[] = [];
@@ -152,7 +169,7 @@ function showTools() {
     el('section', { class: 'section-card' },
       el('div', { class: 'eyebrow' }, 'The chart'),
       el('h2', {}, 'Clear votes'),
-      el('p', { class: 'muted' }, 'For undoing a burst of fake votes, or starting a workshop with a clean chart. Votes cannot be brought back.'),
+      el('p', { class: 'muted' }, 'For undoing a burst of fake votes. Cleared votes leave the chart for good, but they are kept in an archive and are in the backup below. There is no need to clear the chart between workshops.'),
       el('div', { class: 'facilitator-bulk' },
         el('label', { for: 'vote-minutes' }, 'Clear votes cast in the last'), voteMinutes, el('span', {}, 'minutes'),
         careful('Clear those votes', 'Sure? Clear them', async () => {
@@ -163,8 +180,13 @@ function showTools() {
         el('span', {}, 'Or wipe the chart completely:'),
         careful('Clear every vote', 'Sure? Every vote goes', async () => {
           const out = await call<{ cleared: number }>('/api/sessions/OPEN/clear-votes', 'POST', {});
-          return `Cleared all ${out.cleared} votes. The chart is empty.`;
+          return `Cleared all ${out.cleared} votes. The chart is empty; the votes are kept in the archive.`;
         }, report))),
+    el('section', { class: 'section-card' },
+      el('div', { class: 'eyebrow' }, 'Safe keeping'),
+      el('h2', {}, 'Download a backup'),
+      el('p', { class: 'muted' }, 'Every vote (including cleared ones) and every community prompt, as one file. Take one after each workshop.'),
+      el('div', { class: 'action-bar' }, backup)),
     el('p', { class: 'muted', style: 'text-align:center' },
       el('button', { type: 'button', class: 'linkish', id: 'sign-out' }, 'Lock this page')));
   document.getElementById('sign-out')!.addEventListener('click', () => {

@@ -66,6 +66,7 @@ export const getMyVotes = (code: string) =>
 export function sendReaction(code: string, promptId: string, kind: ReactionKind | null) {
   return request<void>(`/api/sessions/${encodeURIComponent(code)}/reactions`, {
     method: 'PUT',
+    keepalive: true, // finished by the browser even if the page is closed or left
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ voter: voterId(), promptId, kind }),
   });
@@ -85,6 +86,7 @@ export function shareCommunity(purpose: string, prompt: string) {
 export function sendCommunityReaction(id: number, kind: ReactionKind | null) {
   return request<void>(`/api/community/${id}/reactions`, {
     method: 'PUT',
+    keepalive: true, // finished by the browser even if the page is closed or left
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ voter: voterId(), kind }),
   });
@@ -124,28 +126,32 @@ const inTurn = <T>(work: () => Promise<T>): Promise<T> => {
   return next;
 };
 
+const same = (a: Job, b: Job) => JSON.stringify(a) === JSON.stringify(b);
+const forget = (job: Job) => writeOutbox(readOutbox().filter((j) => !same(j, job)));
+
 /**
  * Do it now if the server answers; if the server is not there, keep it for later.
  * Returns '' unless the server itself refused, in which case its reason. Never throws.
  */
 export function deliver(job: Job): Promise<string> {
-  // This is the latest word on its target, so anything older still waiting is dropped
-  // first: a queued "happy" must not be sent after this "sad".
-  const waiting = readOutbox();
-  if (waiting.some((j) => sameTarget(j, job))) writeOutbox(waiting.filter((j) => !sameTarget(j, job)));
+  // Saved before it is sent, and taken out only once the server has answered: a tab closed
+  // while the request is in the air loses nothing, the next visit sends it. This is also
+  // the latest word on its target, so it replaces anything older still waiting: a queued
+  // "happy" must not be sent after this "sad".
+  writeOutbox([...readOutbox().filter((j) => !sameTarget(j, job)), job]);
   return inTurn(async () => {
     try {
       await send(job);
-      return '';
     } catch (err) {
-      if (!(err instanceof Offline)) return (err as Error).message;
-      writeOutbox([...readOutbox().filter((j) => !sameTarget(j, job)), job]);
-      return '';
+      // Server away: it stays saved, unless a newer vote has taken its place meanwhile.
+      if (err instanceof Offline) return '';
+      forget(job);
+      return (err as Error).message;
     }
+    forget(job);
+    return '';
   });
 }
-
-const same = (a: Job, b: Job) => JSON.stringify(a) === JSON.stringify(b);
 
 /** Send whatever is waiting. Stops at the first sign the server is still away. */
 export function flushOutbox(): Promise<void> {
@@ -159,7 +165,7 @@ export function flushOutbox(): Promise<void> {
         if (err instanceof Offline) return; // still away: keep this and the rest
         // refused for a reason of its own (voting closed, say): there is no point retrying
       }
-      writeOutbox(readOutbox().filter((j) => !same(j, job)));
+      forget(job);
     }
   });
 }

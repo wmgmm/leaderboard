@@ -81,6 +81,9 @@ export const useAppStore = create<AppState>()(
       // changed or taken back on the try-it page), plus anything still waiting to be sent.
       syncVotes: () => {
         getMyVotes(SESSION_CODE).then(mine => {
+          // A slow reply that lands after they have started voting is older than what this
+          // browser now knows: using it would wipe the votes just cast from the screen.
+          if (get().view !== 'landing') return;
           const votes: Record<string, ReactionKind> = { ...mine };
           const waiting = waitingVotes(SESSION_CODE);
           for (const id of Object.keys(waiting)) {
@@ -126,6 +129,9 @@ export const useAppStore = create<AppState>()(
         if (kind === 'happy') liked.push(card);
         const next = currentCardIndex + 1;
         const done = next >= shuffledCases.length;
+        // Sent (or saved to send later) before anything else, so nothing that goes wrong
+        // below can cost the vote. The sprint never waits for the network, and never mentions it.
+        deliver({ t: 'vote', code: SESSION_CODE, id: card.id, kind });
         set({
           votes: { ...votes, [card.id]: kind },
           savedCases: liked,
@@ -134,9 +140,6 @@ export const useAppStore = create<AppState>()(
           // After the last card comes the one where they give rather than vote.
           ...(done ? { isTimerRunning: false, view: 'share' as View } : {}),
         });
-        // The sprint never waits for the network, and never mentions it: a vote that cannot
-        // be sent is held in the outbox and goes when the server is back.
-        deliver({ t: 'vote', code: SESSION_CODE, id: card.id, kind });
       },
 
       // On to the results after that last card, whether they submitted or not.

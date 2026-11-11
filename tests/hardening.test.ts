@@ -97,6 +97,17 @@ describe('removing community prompts', () => {
   });
 });
 
+describe('a vote that hits the limit for a network', () => {
+  it('is answered as "try later" (503), which browsers hold and send again, never as a refusal', async () => {
+    const busy = createApp(await openDb(), KEY);
+    const made = await busy.request('/api/sessions', json('POST', { name: 'Busy room', promptIds: ['p01', 'p02'] }, auth));
+    const { code } = (await made.json()) as { code: string };
+    const vote = (n: number) => busy.request(`/api/sessions/${code}/reactions`, json('PUT', { voter: `voter-busy${n % 50}`, promptId: 'p01', kind: 'happy' }));
+    for (let i = 0; i < WRITES_PER_MINUTE; i++) await vote(i);
+    expect((await vote(1)).status).toBe(503);
+  }, 30000);
+});
+
 describe('the kill switch for community prompts', () => {
   it('answers 503 so pages hold the entry and say nothing', async () => {
     const paused = createApp(await openDb(), KEY, { communityOpen: false });
@@ -117,6 +128,9 @@ describe('clearing votes', () => {
     expect(await res.json()).toEqual({ cleared: 2 });
     const after = await board();
     expect([after.voters, after.rows[0].happy]).toEqual([0, 0]);
+    // Off the chart, but kept: votes are never destroyed.
+    const kept = await db.query<{ voter: string; kind: string }>("SELECT voter, kind FROM reactions_archive WHERE session_code = 'ROOM' ORDER BY voter");
+    expect(kept).toEqual([{ voter: 'voter-cv01', kind: 'happy' }, { voter: 'voter-cv02', kind: 'happy' }]);
   });
   it('can clear only the last few minutes', async () => {
     await vote('voter-cv03', 'p02');
@@ -125,6 +139,22 @@ describe('clearing votes', () => {
     const res = await app.request('/api/sessions/ROOM/clear-votes', json('POST', { minutes: 30 }, auth));
     expect(await res.json()).toEqual({ cleared: 1 });
     expect((await board()).rows.find((r) => r.id === 'p02')!.happy).toBe(1);
+    expect((await db.query("SELECT 1 FROM reactions_archive WHERE voter = 'voter-cv04'")).length).toBe(1);
+  });
+});
+
+describe('the backup download', () => {
+  it('needs the passphrase and holds every vote, live and cleared', async () => {
+    expect((await app.request('/api/facilitator/export')).status).toBe(401);
+    const res = await app.request('/api/facilitator/export', { headers: auth });
+    expect(res.status).toBe(200);
+    const all = (await res.json()) as Record<string, unknown[]>;
+    expect(Object.keys(all).sort()).toEqual(['community_prompts', 'community_votes', 'exported_at', 'reactions', 'reactions_archive', 'sessions']);
+    for (const table of ['reactions', 'reactions_archive', 'sessions', 'community_prompts', 'community_votes']) {
+      const rows = await db.query(`SELECT count(*) AS n FROM ${table}`);
+      expect(all[table].length).toBe(Number((rows[0] as { n: string | number }).n));
+    }
+    expect(all.reactions_archive.length).toBeGreaterThan(0);
   });
 });
 

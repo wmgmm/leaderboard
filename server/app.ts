@@ -5,7 +5,7 @@ import type { Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { streamSSE } from 'hono/streaming';
-import { REACTION_POINTS, rankByCounts } from '../shared/ranking';
+import { REACTION_POINTS, rankByCounts, sortByScore } from '../shared/ranking';
 import { shareProblem, tidyPrompt, tidyPurpose } from '../shared/community';
 import { REACTION_KINDS } from '../shared/types';
 import type { Board, CommunityItem, ReactionKind, SessionInfo } from '../shared/types';
@@ -146,6 +146,21 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
   // Lets the facilitator page find out whether a passphrase is right before showing its tools.
   app.get('/api/facilitator/check', async (c) => ((await isFacilitator(c)) ? c.body(null, 204) : c.json({ error: 'Facilitator key needed' }, 401)));
 
+  // Everything the database holds, for the facilitator to download and keep as a backup.
+  // Nothing personal is in it: voters are random ids made in the browser.
+  app.get('/api/facilitator/export', async (c) => {
+    if (!(await isFacilitator(c))) return c.json({ error: 'Facilitator key needed' }, 401);
+    const table = (name: string, order: string) => db.query(`SELECT * FROM ${name} ORDER BY ${order}`);
+    return c.json({
+      exported_at: new Date().toISOString(),
+      sessions: await table('sessions', 'code'),
+      reactions: await table('reactions', 'session_code, prompt_id, voter'),
+      reactions_archive: await table('reactions_archive', 'cleared_at, session_code, prompt_id, voter'),
+      community_prompts: await table('community_prompts', 'id'),
+      community_votes: await table('community_votes', 'prompt_id, voter'),
+    });
+  });
+
   // ---- Community prompts: one shared list for everyone, not tied to a session ----
 
   // `asker` is the anonymous id of the browser asking, if it said. Its own entries come back
@@ -167,8 +182,8 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
         item.points += Number(r.n) * REACTION_POINTS[r.kind];
       }
     }
-    // Best first; among equals the newest first, so a fresh prompt gets seen.
-    return Array.from(items.values()).sort((a, b) => b.points - a.points || b.id - a.id).slice(0, COMMUNITY_LIST_MAX);
+    // Best first, by the chart's own rule; among equals the newest first, so a fresh prompt gets seen.
+    return sortByScore(Array.from(items.values()), (a, b) => b.id - a.id).slice(0, COMMUNITY_LIST_MAX);
   }
 
   app.get('/api/community', async (c) => {
@@ -229,7 +244,9 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
     }
     const id = Number(c.req.param('id'));
     const flood = limits.check(addressOf(c), voter);
-    if (flood) return c.json({ error: flood }, 429);
+    // 503, not 429: to the pages a 5xx means "hold this vote and send it again later".
+    // A refusal would be thrown away, and a busy room must never cost anyone their vote.
+    if (flood) return c.json({ error: flood }, 503);
     const found = await db.query<{ voter: string }>('SELECT voter FROM community_prompts WHERE id = $1 AND NOT is_hidden AND is_approved', [id]);
     if (!found.length) return c.json({ error: 'That prompt is no longer here' }, 404);
     // The chart is other people's verdict on it, so the person who shared it has no vote.
@@ -310,7 +327,9 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
   });
 
   // Clear a session's votes: all of them, or only those from the last so-many minutes
-  // (for undoing a burst of fake ones without losing the room's real votes).
+  // (for undoing a burst of fake ones without losing the room's real votes). Cleared votes
+  // leave the chart but are never destroyed (Matt, 11 Nov 2026: "this data is important"):
+  // they move to reactions_archive in the same statement, and the backup download has them.
   app.post('/api/sessions/:code/clear-votes', async (c) => {
     if (!(await isFacilitator(c))) return c.json({ error: 'Facilitator key needed' }, 401);
     const session = await getSession(c.req.param('code'));
@@ -320,10 +339,12 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
     if (minutes !== null && (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440)) {
       return c.json({ error: 'Give minutes, 1 to 1440, or nothing to clear all' }, 400);
     }
+    const ARCHIVE = `INSERT INTO reactions_archive (session_code, voter, prompt_id, kind, updated_at)
+      SELECT session_code, voter, prompt_id, kind, updated_at FROM gone RETURNING 1`;
     const rows = minutes === null
-      ? await db.query('DELETE FROM reactions WHERE session_code = $1 RETURNING 1', [session.code])
+      ? await db.query(`WITH gone AS (DELETE FROM reactions WHERE session_code = $1 RETURNING *) ${ARCHIVE}`, [session.code])
       : await db.query(
-        "DELETE FROM reactions WHERE session_code = $1 AND updated_at > now() - ($2 || ' minutes')::interval RETURNING 1",
+        `WITH gone AS (DELETE FROM reactions WHERE session_code = $1 AND updated_at > now() - ($2 || ' minutes')::interval RETURNING *) ${ARCHIVE}`,
         [session.code, String(minutes)]);
     await broadcast(session);
     return c.json({ cleared: rows.length });
@@ -360,7 +381,9 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
       return c.json({ error: 'That vote did not go through. Refresh the page and try again.' }, 400);
     }
     const flood = limits.check(addressOf(c), voter);
-    if (flood) return c.json({ error: flood }, 429);
+    // 503, not 429: to the pages a 5xx means "hold this vote and send it again later".
+    // A refusal would be thrown away, and a busy room must never cost anyone their vote.
+    if (flood) return c.json({ error: flood }, 503);
     if (kind === null) {
       await db.query('DELETE FROM reactions WHERE session_code = $1 AND voter = $2 AND prompt_id = $3',
         [session.code, voter, promptId]);

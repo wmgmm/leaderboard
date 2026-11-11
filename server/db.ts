@@ -39,6 +39,14 @@ CREATE TABLE IF NOT EXISTS community_votes (
   PRIMARY KEY (prompt_id, voter)
 );
 ALTER TABLE community_prompts ADD COLUMN IF NOT EXISTS is_approved boolean NOT NULL DEFAULT false;
+CREATE TABLE IF NOT EXISTS reactions_archive (
+  session_code text NOT NULL,
+  voter        text NOT NULL,
+  prompt_id    text NOT NULL,
+  kind         text NOT NULL,
+  updated_at   timestamptz NOT NULL,
+  cleared_at   timestamptz NOT NULL DEFAULT now()
+);
 `;
 
 export async function openDb(databaseUrl?: string, dataDir?: string): Promise<Db> {

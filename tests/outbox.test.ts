@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const store = new Map<string, string>();
 let serverUp = true;
 let slow = 0;
+let failNext = 0; // this many requests get no reply, then the server is back
 const received: string[] = []; // what reached the server, in order
 
 vi.stubGlobal('location', { hostname: 'localhost' });
@@ -16,7 +17,7 @@ vi.stubGlobal('localStorage', {
 });
 vi.stubGlobal('fetch', async (url: string, init?: { body?: string }) => {
   if (slow) await new Promise((r) => setTimeout(r, slow));
-  if (!serverUp) throw new TypeError('network down');
+  if (!serverUp || failNext-- > 0) throw new TypeError('network down');
   const body = init?.body ? JSON.parse(init.body) : {};
   received.push(`${url.replace(/^.*\/api\//, '')} ${body.kind ?? body.purpose ?? ''}`.trim());
   return new Response(null, { status: 204 });
@@ -26,7 +27,7 @@ const { deliver, flushOutbox, waitingVotes } = await import('../shared/client');
 const outbox = () => JSON.parse(store.get('totp-outbox') || '[]') as { kind?: string }[];
 const vote = (kind: 'happy' | 'neutral' | 'sad') => ({ t: 'vote' as const, code: 'OPEN', id: 'p01', kind });
 
-beforeEach(() => { store.clear(); received.length = 0; serverUp = true; slow = 0; });
+beforeEach(() => { store.clear(); received.length = 0; serverUp = true; slow = 0; failNext = 0; });
 
 describe('the outbox', () => {
   it('holds a vote while the server is away, says nothing, and sends it when it is back', async () => {
@@ -47,6 +48,26 @@ describe('the outbox', () => {
     await deliver(vote('sad')); // the person changes their mind before the next flush
     await flushOutbox();
     expect(received).toEqual(['sessions/OPEN/reactions sad']); // happy was dropped, not sent late
+    expect(outbox()).toEqual([]);
+  });
+
+  it('saves a vote before sending it, so closing the tab mid-send cannot lose it', async () => {
+    slow = 20;
+    const sending = deliver(vote('happy'));
+    expect(outbox()).toHaveLength(1); // on disk while the request is still in the air
+    await sending;
+    expect(received).toEqual(['sessions/OPEN/reactions happy']);
+    expect(outbox()).toEqual([]);
+  });
+
+  it('never lets a first vote that failed come back over a second that got through', async () => {
+    slow = 5;
+    failNext = 1; // the first request is lost in a blip
+    const first = deliver(vote('happy'));
+    const second = deliver(vote('sad'));
+    await Promise.all([first, second]);
+    await flushOutbox();
+    expect(received).toEqual(['sessions/OPEN/reactions sad']);
     expect(outbox()).toEqual([]);
   });
 
