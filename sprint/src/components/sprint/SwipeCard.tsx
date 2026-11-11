@@ -313,12 +313,13 @@ export function SwipeCard() {
             whileHover={{ y: -2 }}
             onClick={() => commit(face.kind)}
             aria-label={face.label}
-            className="flex items-center justify-center gap-2.5 rounded-2xl px-3 py-2.5 md:py-3 transition-colors"
+            className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 rounded-2xl px-1.5 md:px-3 py-2.5 md:py-3 transition-colors"
             style={{ background: 'var(--bg-card)', border: `2px solid ${TINT[face.kind]}`, color: 'var(--text-primary)', boxShadow: 'var(--shadow-card)' }}
           >
             <span className="text-2xl md:text-3xl leading-none" aria-hidden="true">{face.emoji}</span>
-            <span className="flex flex-col items-start leading-tight">
-              <span className="text-sm md:text-base font-semibold">{face.label}</span>
+            {/* On a phone the face sits above its label, so "Not for me" stays on one line */}
+            <span className="flex flex-col items-center md:items-start leading-tight">
+              <span className="text-sm md:text-base font-semibold whitespace-nowrap">{face.label}</span>
               <span className="text-[11px] md:text-xs [@media(max-height:46em)]:hidden" style={{ color: 'var(--text-tertiary)' }} aria-hidden="true">
                 {HOW[face.kind]}
               </span>

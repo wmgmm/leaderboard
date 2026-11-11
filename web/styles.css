@@ -191,7 +191,7 @@ details[open] summary { color: var(--apple-blue); }
 .share-reassure { margin: 6px 0 0; font-size: 1rem; color: var(--apple-text-secondary); }
 .share-form .optional { font-weight: 400; color: var(--apple-text-secondary); }
 .share-form input, .share-form textarea {
-    display: block; width: 100%; margin: 0 0 14px; padding: 11px 14px; font: 15px/1.4 var(--font-stack); color: var(--apple-text-primary);
+    display: block; width: 100%; margin: 0 0 14px; padding: 11px 14px; font: 16px/1.4 var(--font-stack); /* 16px: an iPhone zooms the page in on any smaller field */ color: var(--apple-text-primary);
     background: #fff; border: 1.5px solid #86868b; border-radius: var(--radius-medium); resize: vertical;
 }
 .share-form input:focus, .share-form textarea:focus { outline: 2px solid var(--apple-blue); outline-offset: 1px; border-color: var(--apple-blue); }

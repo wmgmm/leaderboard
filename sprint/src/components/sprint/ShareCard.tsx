@@ -87,10 +87,12 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
     >
       {!fromHome && !standalone && <GlassHeader />}
 
-      <div className="flex-1 flex flex-col px-5 pb-6" style={{ paddingTop: 'calc(max(12px, env(safe-area-inset-top)) + 3.75rem)' }}>
+      {/* With no top bar above it (opened from the first screen, or the page on its own) the
+          form starts near the top on a phone, so Submit stays above the keyboard. */}
+      <div className={`flex-1 flex flex-col px-5 pb-6 ${fromHome || standalone ? 'max-md:!pt-5' : ''}`} style={{ paddingTop: 'calc(max(12px, env(safe-area-inset-top)) + 3.75rem)' }}>
         <form
           onSubmit={suggest}
-          className="w-full max-w-sm md:max-w-2xl lg:max-w-3xl mx-auto rounded-2xl p-5 md:p-8 flex flex-col"
+          className={`w-full max-w-sm md:max-w-2xl lg:max-w-3xl mx-auto rounded-2xl p-5 md:p-8 flex flex-col ${fromHome || standalone ? 'max-md:!mt-0' : ''}`}
           // The top margin stands in for the "Would you use this prompt?" line above a sprint card.
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card-hover)', marginTop: '2.5rem' }}
         >
@@ -109,13 +111,14 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
           <label htmlFor="share-purpose" className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
             What do you use AI for?
           </label>
+          {/* The fields are 16px on a phone: anything smaller makes an iPhone zoom in when one is tapped */}
           <input
             id="share-purpose" type="text" autoComplete="off" autoFocus
             value={purpose} maxLength={COMMUNITY_LIMITS.purposeMax}
             onChange={e => { setPurpose(e.target.value); setProblem(''); }}
             placeholder="e.g. Turning my meeting notes into actions"
             aria-invalid={problem ? true : undefined} aria-describedby="share-help share-problem"
-            className="w-full rounded-xl px-4 py-3 md:px-6 text-sm md:text-lg mb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]" style={field}
+            className="w-full rounded-xl px-4 py-3 md:px-6 text-base md:text-lg mb-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]" style={field}
           />
 
           <label htmlFor="share-prompt" className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
@@ -127,7 +130,7 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
             value={prompt}
             onChange={e => { setPrompt(e.target.value); setProblem(''); }}
             placeholder="Paste it here if you have one"
-            className="w-full rounded-xl px-4 py-3 md:px-6 md:py-5 text-sm md:text-lg leading-relaxed mb-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] resize-y" style={field}
+            className="w-full rounded-xl px-4 py-3 md:px-6 md:py-5 text-base md:text-lg leading-relaxed mb-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] resize-y" style={field}
           />
 
           <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>

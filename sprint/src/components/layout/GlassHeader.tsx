@@ -6,17 +6,18 @@ export function GlassHeader() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 py-3 glass"
+      className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between gap-3 px-5 py-3 glass"
       style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
     >
       <Timer />
 
-      <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-        Community Top of the Prompts
+      {/* One line each on a phone: the short forms, never a wrapped bar */}
+      <span className="text-sm font-medium min-w-0 truncate" style={{ color: 'var(--text-secondary)' }}>
+        <span className="hidden sm:inline">Community </span>Top of the Prompts
       </span>
 
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Loved so far</span>
+      <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Loved<span className="hidden sm:inline"> so far</span></span>
         <span
           className="font-bold text-lg min-w-[1.5rem] text-right"
           style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}

@@ -44,7 +44,7 @@ export function ExportButton() {
         boxShadow: disabled ? 'none' : '0 2px 10px rgba(0,113,227,0.3)',
       }}
     >
-      {generating ? 'Generating...' : 'Download prompts as PDF'}
+      {generating ? 'Generating...' : 'Download PDF'}
     </button>
   );
 }
