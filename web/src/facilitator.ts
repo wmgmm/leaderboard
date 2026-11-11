@@ -14,11 +14,14 @@ let passphrase = '';
 try { passphrase = sessionStorage.getItem(KEY) || ''; } catch { /* storage blocked: ask each time */ }
 
 async function call<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 10000);
   const res = await fetch(API + path, {
+    signal: abort.signal,
     method,
     headers: { 'x-facilitator-key': passphrase, ...(body === undefined ? {} : { 'content-type': 'application/json' }) },
     body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  }).catch(() => { throw new Error('The vote server did not answer. Try again in a moment.'); }).finally(() => clearTimeout(timer));
   if (res.status === 401) throw new Error('That passphrase was not accepted.');
   if (!res.ok) {
     const problem = await res.json().catch(() => null);

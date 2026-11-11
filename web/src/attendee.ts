@@ -12,7 +12,10 @@ const params = new URLSearchParams(location.search);
 function memory(code: string) {
   const key = `totp-${code}`;
   let state: { copied: string[]; votes: Record<string, ReactionKind> } = { copied: [], votes: {} };
-  try { state = JSON.parse(localStorage.getItem(key) || '') || state; } catch { /* first visit */ }
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || '');
+    if (saved && Array.isArray(saved.copied) && saved.votes && typeof saved.votes === 'object') state = saved;
+  } catch { /* first visit */ }
   return { state, save: () => { try { localStorage.setItem(key, JSON.stringify(state)); } catch { /* fine */ } } };
 }
 
@@ -209,7 +212,14 @@ async function start() {
   let session: SessionInfo = { ...everyone, code };
   let mine: Record<string, ReactionKind> | null = null;
   try {
-    [session, mine] = await Promise.all([getSession(code), getMyVotes(code)]);
+    // The list must not wait long for the vote server: after 2 seconds it is shown anyway.
+    const [found, votes] = await Promise.race([
+      Promise.all([getSession(code), getMyVotes(code)]),
+      new Promise<never>((_, late) => setTimeout(() => late(new Offline('slow')), 2000)),
+    ]);
+    if (!found || !Array.isArray(found.promptIds)) throw new Offline('Not the vote server.');
+    session = found;
+    mine = votes && typeof votes === 'object' ? votes : null;
   } catch (err) {
     // Vote server away, or an unknown code: carry on with the standing session. With the
     // server away the page still lists, copies and takes votes; they are sent when it is back.
@@ -220,4 +230,6 @@ async function start() {
   }
   showSession(session, prompts, mine);
 }
-start();
+start().catch(() => {
+  main.replaceChildren(el('p', { class: 'muted' }, 'The prompts did not load. ', el('a', { href: location.href }, 'Try again')));
+});

@@ -7,7 +7,9 @@ import { createHmac, randomBytes } from 'node:crypto';
 const SECRET = randomBytes(32);
 const keyFor = (address: string) => createHmac('sha256', SECRET).update(address).digest('base64url');
 
-export const WRITES_PER_MINUTE = 900; // 60 people voting on a card every 4 seconds
+// 60 people swiping a card a second is 3,600 a minute, and after an outage every browser
+// sends what it was holding at once. 900 was measured to hold votes back in a room of 45.
+export const WRITES_PER_MINUTE = 6000;
 export const NEW_VOTERS_PER_HOUR = 200; // more browsers than any one room holds
 
 interface Seen { minute: number; writes: number; hour: number; voters: Set<string> }

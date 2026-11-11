@@ -79,10 +79,14 @@ export function SwipeCard() {
     // and left a blank one (the workshop of 11 Nov 2026).
     if (reduceMotion) { next(); return; }
     const out = EXIT[kind];
+    // The fly-out is a nicety: if it never reports back, the next card still comes.
+    let gone = false;
+    const once = () => { if (!gone) { gone = true; next(); } };
     Promise.all([
       animate(x, out.x, { type: 'tween', duration: 0.25 }),
       animate(y, out.y, { type: 'tween', duration: 0.25 }),
-    ]).then(next);
+    ]).then(once, once);
+    setTimeout(once, 600);
   };
 
   const bind = useDrag(

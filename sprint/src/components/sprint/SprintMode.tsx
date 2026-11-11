@@ -29,8 +29,8 @@ export function SprintMode() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col"
-      style={{ background: 'var(--bg-page)', height: '100dvh', minHeight: '30em' }}
+      className="flex flex-col select-none"
+      style={{ background: 'var(--bg-page)', height: '100dvh', minHeight: '30em', WebkitUserSelect: 'none' }}
     >
       <GlassHeader />
 

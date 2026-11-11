@@ -102,7 +102,11 @@ export type Job =
 
 const OUTBOX = 'totp-outbox';
 const readOutbox = (): Job[] => {
-  try { return JSON.parse(localStorage.getItem(OUTBOX) || '[]'); } catch { return []; }
+  try {
+    const jobs = JSON.parse(localStorage.getItem(OUTBOX) || '[]');
+    // Anything that is not a list of jobs (a damaged or foreign value) counts as empty.
+    return Array.isArray(jobs) ? jobs.filter((j) => j && typeof j === 'object' && typeof j.t === 'string') : [];
+  } catch { return []; }
 };
 const writeOutbox = (jobs: Job[]) => {
   try { localStorage.setItem(OUTBOX, JSON.stringify(jobs)); } catch { /* storage blocked: the job is lost with the tab */ }

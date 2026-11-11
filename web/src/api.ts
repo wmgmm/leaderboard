@@ -13,7 +13,19 @@ if (!Element.prototype.replaceChildren) {
   };
 }
 
-export const getPrompts = () => fetch('prompts.json').then((r) => r.json() as Promise<Prompt[]>);
+/** The prompts, tried a few times with a time limit each: one dropped request must not leave an empty page. */
+export async function getPrompts(): Promise<Prompt[]> {
+  for (let attempt = 0; ; attempt++) {
+    const abort = 'AbortController' in window ? new AbortController() : null;
+    const timer = abort ? setTimeout(() => abort.abort(), 8000) : 0;
+    try {
+      const r = await fetch('prompts.json', abort ? { signal: abort.signal } : undefined);
+      if (r.ok) return await r.json();
+    } catch { /* try again */ } finally { clearTimeout(timer); }
+    if (attempt >= 2) throw new Error('The prompts did not load.');
+    await new Promise((done) => setTimeout(done, 700 * (attempt + 1)));
+  }
+}
 
 /**
  * Calls onBoard with every new board, for the projector. Uses a live stream, and
@@ -40,8 +52,21 @@ export function watchBoard(code: string, onBoard: (board: Board) => void, onMode
     const stream = new EventSource(`${API}/api/sessions/${encodeURIComponent(code)}/stream`);
     source = stream;
     let heard = false;
+    // The server sends a board on every vote and a ping every 20 seconds. Nothing at all for
+    // 45 seconds means the link has died without saying so (a Wi-Fi blip): start again.
+    let last = Date.now();
+    stream.addEventListener('ping', () => { last = Date.now(); });
+    const watchdog = setInterval(() => {
+      if (source !== stream) return clearInterval(watchdog);
+      if (Date.now() - last < 45000) return;
+      clearInterval(watchdog);
+      stream.close();
+      source = null;
+      open();
+    }, 5000);
     stream.addEventListener('board', (e) => {
       heard = true;
+      last = Date.now();
       onMode?.('live');
       onBoard(JSON.parse((e as MessageEvent).data));
     });

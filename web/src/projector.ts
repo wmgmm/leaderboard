@@ -82,8 +82,8 @@ function draw() {
   rowEls.forEach((node, id) => firstTop.set(id, node.getBoundingClientRect().top));
 
   emptyNote.remove();
-  if (!rows.length && (view === 'community' || board)) {
-    emptyNote.textContent = VIEWS.find((v) => v.key === view)!.empty;
+  if (!rows.length) {
+    emptyNote.textContent = view === 'community' || board ? VIEWS.find((v) => v.key === view)!.empty : 'Waiting for the vote server. The chart will appear here by itself.';
     chart.append(emptyNote);
   }
 
@@ -109,7 +109,7 @@ function draw() {
     for (const f of FACES) node.querySelector(`.tally [data-kind="${f.kind}"]`)!.textContent = `${f.emoji} ${row[f.kind]}`;
     const loved = lovedPercent(row);
     node.querySelector('.pct')!.textContent = loved === null ? '' : `${loved}% loved`;
-    node.querySelector('.pts')!.textContent = !votes ? 'No votes yet' : row.score === null ? '' : `Score ${row.score.toFixed(1)}`;
+    node.querySelector('.pts')!.textContent = !votes ? 'No votes yet' : typeof row.score !== 'number' ? '' : `Score ${row.score.toFixed(1)}`;
     chart.append(node); // appending in order reorders the list
   }
 
@@ -135,7 +135,8 @@ function draw() {
 
 function refreshCommunity() {
   getCommunity().then((items) => {
-    community = items;
+    if (!Array.isArray(items)) return;
+    community = items.filter(Boolean);
     if (view === 'community') draw(); else drawFilters();
   }).catch(() => { /* vote server away: keep what is on screen */ });
 }
@@ -153,12 +154,19 @@ function sizeToWindow() {
 sizeToWindow();
 window.addEventListener('resize', sizeToWindow);
 
+const isBoard = (b: unknown): b is Board => {
+  const x = b as Board | null;
+  return Boolean(x && x.session && Array.isArray(x.rows) && x.rows.every((r) => r && typeof r.id === 'string'));
+};
+
 async function start() {
   const prompts: Prompt[] = await getPrompts();
   titles = new Map(prompts.map((p) => [p.id, p.title] as const));
   try { const last = localStorage.getItem(CACHE); if (last) board = JSON.parse(last); } catch { /* no saved chart */ }
+  if (!isBoard(board)) board = null; // a damaged saved chart must not stop the live one
   draw();
   watchBoard(code, (latest) => {
+    if (!isBoard(latest)) return; // not a chart: keep what is on screen
     board = latest;
     try { localStorage.setItem(CACHE, JSON.stringify(latest)); } catch { /* fine */ }
     draw();
@@ -169,4 +177,4 @@ async function start() {
   setInterval(() => { if (!document.hidden && view === 'community') refreshCommunity(); }, 5000);
   setInterval(() => { if (!document.hidden && view !== 'community') refreshCommunity(); }, 30000);
 }
-start();
+start().catch(() => { meta.textContent = 'The chart did not load. Refresh the page.'; setTimeout(() => location.reload(), 15000); });

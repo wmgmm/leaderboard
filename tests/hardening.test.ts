@@ -105,7 +105,13 @@ describe('a vote that hits the limit for a network', () => {
     const vote = (n: number) => busy.request(`/api/sessions/${code}/reactions`, json('PUT', { voter: `voter-busy${n % 50}`, promptId: 'p01', kind: 'happy' }));
     for (let i = 0; i < WRITES_PER_MINUTE; i++) await vote(i);
     expect((await vote(1)).status).toBe(503);
-  }, 30000);
+    // The same for a prompt shared in that minute: held and sent again, not thrown away.
+    expect((await busy.request('/api/community', json('POST', { voter: 'voter-busy1', purpose: 'Shared in a busy minute' }))).status).toBe(503);
+  }, 60000);
+
+  it('leaves room for 60 people swiping a card a second, and for everyone sending at once after an outage', () => {
+    expect(WRITES_PER_MINUTE).toBeGreaterThanOrEqual(6000);
+  });
 });
 
 describe('the kill switch for community prompts', () => {

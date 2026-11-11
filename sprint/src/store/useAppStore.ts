@@ -167,6 +167,20 @@ export const useAppStore = create<AppState>()(
       // so reusing 'ai-discovery-toolkit' would overwrite people's saved prompts there.
       name: 'totp-sprint',
       version: 1,
+      // Saved state is only trusted where it has the right shape: a damaged value must not
+      // reach a component, where it would throw and leave a white page.
+      merge: (saved, current) => {
+        const s = (saved && typeof saved === 'object' ? saved : {}) as Partial<AppState>;
+        const votes = s.votes && typeof s.votes === 'object' && !Array.isArray(s.votes) ? s.votes : {};
+        const ok = (c: unknown): c is UseCase => Boolean(c && typeof c === 'object' && typeof (c as UseCase).id === 'string');
+        return {
+          ...current,
+          votes,
+          savedCases: Array.isArray(s.savedCases) ? s.savedCases.filter(ok).map(c => useCases.find(u => u.id === c.id)).filter((c): c is UseCase => Boolean(c)) : [],
+          cleared: Array.isArray(s.cleared) ? s.cleared.filter(id => typeof id === 'string') : [],
+          hasSprinted: Boolean(s.hasSprinted),
+        };
+      },
       partialize: (state) => ({
         savedCases: state.savedCases, votes: state.votes, cleared: state.cleared, hasSprinted: state.hasSprinted,
       }),

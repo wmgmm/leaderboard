@@ -221,7 +221,9 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
       [voter, purpose, prompt]);
     if (already.length) return c.json({ id: already[0].id }, 200);
     const flood = limits.check(addressOf(c), voter);
-    if (flood) return c.json({ error: flood }, 429);
+    // 503 as for votes: the page holds the entry and sends it again, instead of saying thank
+    // you and losing it. (The hourly limit on sharing, below, is still a refusal they are told about.)
+    if (flood) return c.json({ error: flood }, 503);
     // Counted from the table, so a restart does not hand everyone a fresh allowance.
     const recent = await db.query<{ mine: string | number; everyone: string | number }>(
       `SELECT count(*) FILTER (WHERE voter = $1) AS mine, count(*) AS everyone
