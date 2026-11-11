@@ -4,14 +4,12 @@ import { useAppStore } from '../../store/useAppStore';
 import { CATEGORIES } from '../../data/categories';
 import { useCases } from '../../data/useCases';
 import { TRY_IT_URL } from '../../lib/session';
-import { SPRINT_CARDS } from '../../lib/constants';
 
 export function LandingPage() {
   const { initSprint, setView, savedCases, syncVotes, openShare, justShared, hasSprinted, votes } = useAppStore();
   // A first visit shows two choices only. The rest appear once they have sprinted or voted.
   const returning = hasSprinted || Object.keys(votes).length > 0;
   const rated = useCases.filter(c => votes[c.id]).length;
-  const unseen = useCases.length - rated;
   useEffect(() => { syncVotes(); }, [syncVotes]);
 
   return (
@@ -55,10 +53,8 @@ export function LandingPage() {
           style={{ color: 'var(--text-secondary)' }}
         >
           {rated === 0
-            ? `${Math.min(SPRINT_CARDS, useCases.length)} prompts picked at random from ${useCases.length}. 5 minutes. You decide what charts.`
-            : unseen > 0
-              ? `You've rated ${rated} of ${useCases.length}. Next up: ${Math.min(SPRINT_CARDS, unseen)} you haven't seen.`
-              : `You've rated all ${useCases.length}. Sprint again to change your mind.`}
+            ? 'You will browse some prompts and just think "Could this be useful?"'
+            : `You've rated ${rated === useCases.length ? 'all ' + rated : rated + ' of ' + useCases.length}. Now please share a useful prompt that helped you!`}
         </motion.p>
 
         <motion.p

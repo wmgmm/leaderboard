@@ -5,9 +5,23 @@ import { SprintMode } from './components/sprint/SprintMode';
 import { SprintResults } from './components/sprint/SprintResults';
 import { CtaModal } from './components/shared/CtaModal';
 import { ShareCard } from './components/sprint/ShareCard';
+import { SHARE_ONLY } from './lib/session';
+
+if (SHARE_ONLY) document.title = 'Tell us how you use AI';
 
 function App() {
   const view = useAppStore(s => s.view);
+
+  // The emailed link: that one card and nothing else.
+  if (SHARE_ONLY) {
+    return (
+      <MotionConfig reducedMotion="user">
+        <div className="min-h-screen" style={{ background: 'var(--bg-page)' }}>
+          <main><ShareCard standalone /></main>
+        </div>
+      </MotionConfig>
+    );
+  }
 
   return (
     // reducedMotion="user": people who have asked their device for less motion get none of the slides and fades.

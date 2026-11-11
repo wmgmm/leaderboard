@@ -4,7 +4,7 @@ import type { Board, CommunityItem, ReactionKind, SessionInfo } from './types';
 
 // Locally the server also serves the pages, so the API is the same address.
 // On GitHub Pages the API lives on Railway.
-const RAILWAY_API = ''; // set once the Railway service exists
+const RAILWAY_API = 'https://leaderboard-production-efc043b4.up.railway.app'; // the vote server on Railway
 const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 export const API = LOCAL ? '' : RAILWAY_API;
 

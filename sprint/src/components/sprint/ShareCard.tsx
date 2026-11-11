@@ -12,7 +12,7 @@ import { GlassHeader } from '../layout/GlassHeader';
  * screen of its own, not a swipe card, because a swipe card swallows typing and arrow keys.
  * The first screen's "Share a useful prompt" opens the same card with no sprint behind it.
  */
-export function ShareCard() {
+export function ShareCard({ standalone = false }: { standalone?: boolean }) {
   const finishSprint = useAppStore(s => s.finishSprint);
   // Opened from the first screen there is no sprint to go back to, and no clock to mention.
   const fromHome = useAppStore(s => s.shareFromHome);
@@ -20,6 +20,9 @@ export function ShareCard() {
   const [purpose, setPurpose] = useState('');
   const [prompt, setPrompt] = useState('');
   const [problem, setProblem] = useState('');
+  // On its own page there is nowhere to go next, so the card itself says thank you.
+  const [sending, setSending] = useState(false);
+  const [thanked, setThanked] = useState(false);
 
   const suggest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +30,17 @@ export function ShareCard() {
     const wrong = shareProblem(purpose, prompt);
     if (wrong) { setProblem(wrong); return; }
     // Sent behind the scenes, or held until the server is back. Nobody waits for it.
+    if (standalone) {
+      // Wait for the server here: someone who came from an email will close the tab next.
+      // If the server is away the entry is kept in this browser and sent when it is back.
+      setSending(true);
+      deliver({ t: 'share', purpose, prompt }).then(refused => {
+        setSending(false);
+        if (refused) { setProblem(refused); return; }
+        setPurpose(''); setPrompt(''); setThanked(true);
+      });
+      return;
+    }
     deliver({ t: 'share', purpose, prompt });
     if (fromHome) closeShare(true); else finishSprint();
   };
@@ -34,6 +48,30 @@ export function ShareCard() {
   const field = {
     background: 'var(--bg-page)', border: '1.5px solid #86868b', color: 'var(--text-primary)', // an edge you can see
   };
+
+  if (standalone && thanked) {
+    return (
+      <div className="flex flex-col min-h-screen px-5 pb-6" style={{ background: 'var(--bg-page)', paddingTop: 'calc(max(12px, env(safe-area-inset-top)) + 3.75rem)' }}>
+        <div
+          role="status"
+          className="w-full max-w-sm md:max-w-2xl lg:max-w-3xl mx-auto rounded-2xl p-5 md:p-8 text-center"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card-hover)', marginTop: '2.5rem' }}
+        >
+          <p className="text-4xl mb-3" aria-hidden="true">🎉</p>
+          <h2 className="text-xl md:text-3xl font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>Thank you</h2>
+          <p className="text-sm md:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
+            Your answer has been added for other staff to see.
+          </p>
+          <button type="button" onClick={() => setThanked(false)} className="btn-secondary px-6 py-3 text-sm md:text-base">
+            Add another
+          </button>
+        </div>
+        <p className="text-xs text-center mt-auto pt-8" style={{ color: 'var(--text-tertiary)' }}>
+          Created by Dr. Matt Mort & Mr. Matt Hayden · Cardiff University
+        </p>
+      </div>
+    );
+  }
 
   return (
     // Laid out like a sprint card: the same top bar, the same place on the screen and the
@@ -47,7 +85,7 @@ export function ShareCard() {
       className="flex flex-col min-h-screen"
       style={{ background: 'var(--bg-page)' }}
     >
-      {!fromHome && <GlassHeader />}
+      {!fromHome && !standalone && <GlassHeader />}
 
       <div className="flex-1 flex flex-col px-5 pb-6" style={{ paddingTop: 'calc(max(12px, env(safe-area-inset-top)) + 3.75rem)' }}>
         <form
@@ -56,11 +94,16 @@ export function ShareCard() {
           // The top margin stands in for the "Would you use this prompt?" line above a sprint card.
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-card-hover)', marginTop: '2.5rem' }}
         >
+          {standalone && (
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--apple-blue-dark)' }}>
+              The Community Approach to AI
+            </p>
+          )}
           <h2 className="text-xl md:text-3xl font-bold mb-1.5 leading-tight" style={{ color: 'var(--text-primary)', textWrap: 'balance' }}>
             Tell us how you use AI 💡
           </h2>
           <p id="share-help" className="text-sm md:text-base mb-5" style={{ color: 'var(--text-secondary)' }}>
-            There is no wrong answer. Add what you use AI for and other staff can vote on it.
+            There is no wrong answer. Add what you use AI for and help other staff get ideas!
           </p>
 
           <label htmlFor="share-purpose" className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
@@ -93,14 +136,21 @@ export function ShareCard() {
           <p id="share-problem" role="alert" className="text-sm mb-3 min-h-[1.25rem]" style={{ color: 'var(--apple-red-text)' }}>{problem}</p>
 
           <div className="flex gap-3">
-            <button type="submit" className="btn-primary px-6 py-3 text-sm md:text-base flex-1">
-              Submit
+            <button type="submit" disabled={sending} className="btn-primary px-6 py-3 text-sm md:text-base flex-1">
+              {sending ? 'Sending...' : 'Submit'}
             </button>
-            <button type="button" onClick={fromHome ? () => closeShare(false) : finishSprint} className="btn-secondary px-6 py-3 text-sm md:text-base">
-              {fromHome ? 'Back' : 'See results'}
-            </button>
+            {!standalone && (
+              <button type="button" onClick={fromHome ? () => closeShare(false) : finishSprint} className="btn-secondary px-6 py-3 text-sm md:text-base">
+                {fromHome ? 'Back' : 'See results'}
+              </button>
+            )}
           </div>
         </form>
+        {standalone && (
+          <p className="text-xs text-center mt-auto pt-8" style={{ color: 'var(--text-tertiary)' }}>
+            Created by Dr. Matt Mort & Mr. Matt Hayden · Cardiff University
+          </p>
+        )}
       </div>
     </motion.div>
   );

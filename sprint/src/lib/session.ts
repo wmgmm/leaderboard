@@ -9,3 +9,7 @@ const withCode = (page: string) => (HAS_ROOM ? `${page}?code=${encodeURIComponen
 export const TRY_IT_URL = withCode('../');
 export const CHART_URL = `../projector.html?code=${encodeURIComponent(SESSION_CODE)}`;
 export const WORKSHOP_URL = 'https://wmgmm.github.io/thematts/workshop.html';
+
+/** The emailed link (share.html) opens the "Tell us how you use AI" card on its own:
+ *  no sprint, no prompts, nothing else to do. */
+export const SHARE_ONLY = new URLSearchParams(location.search).has('share');
