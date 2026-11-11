@@ -23,6 +23,7 @@ export interface BoardRow {
   id: string;
   rank: number; // chart position, 1 = top
   points: number;
+  score?: number | null; // out of 10, what the chart ranks by; null with no votes (see shared/ranking.ts). A chart saved by an older page has none.
   happy: number;
   neutral: number;
   sad: number;
@@ -41,6 +42,7 @@ export interface CommunityItem {
   purpose: string; // "what I use it for": always given, shown as the title
   prompt: string; // optional, so may be empty
   points: number;
+  score?: number | null; // as on the chart
   happy: number;
   neutral: number;
   sad: number;

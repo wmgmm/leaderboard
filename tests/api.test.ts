@@ -88,11 +88,11 @@ describe('reactions', () => {
     expect((await react('voter-bbbb', 'p02', 'neutral')).status).toBe(204);
     const b = await board();
     expect(b.voters).toBe(2);
-    expect(b.rows[0]).toMatchObject({ id: 'p02', rank: 1, points: 3, happy: 1, neutral: 1, recent: 2 });
+    expect(b.rows[0]).toMatchObject({ id: 'p02', rank: 1, points: 4, happy: 1, neutral: 1, recent: 2 });
   });
   it('removes a vote when kind is null', async () => {
     await react('voter-bbbb', 'p02', null);
-    expect((await board()).rows[0]).toMatchObject({ id: 'p02', points: 2, neutral: 0 });
+    expect((await board()).rows[0]).toMatchObject({ id: 'p02', points: 3, neutral: 0 });
   });
   it('rejects prompts outside the session and unknown kinds', async () => {
     expect((await react('voter-aaaa', 'p09', 'happy')).status).toBe(400);

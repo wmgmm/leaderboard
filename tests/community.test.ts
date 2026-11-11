@@ -87,10 +87,10 @@ describe('community prompts', () => {
     await react(notes.id, 'voter-dddd', 'happy');
     await react(week.id, 'voter-cccc', 'sad');
     const items = await list();
-    expect(items[0]).toMatchObject({ purpose: 'Tidying meeting notes', points: 4, happy: 2, neutral: 0 });
-    expect(items.find((i) => i.id === week.id)).toMatchObject({ points: 0, sad: 1 });
+    expect(items[0]).toMatchObject({ purpose: 'Tidying meeting notes', points: 6, happy: 2, neutral: 0 });
+    expect(items.find((i) => i.id === week.id)).toMatchObject({ points: -3, sad: 1 });
     await react(notes.id, 'voter-dddd', null);
-    expect((await list())[0]).toMatchObject({ points: 2, happy: 1 });
+    expect((await list())[0]).toMatchObject({ points: 3, happy: 1 });
   });
 
   it('lets only the facilitator hide a prompt, and a hidden one cannot be voted on', async () => {

@@ -316,7 +316,7 @@ a.activity-hero.page:hover { transform: translateY(-2px); }
     padding: calc(1.2 * var(--pvh, 1vh)) calc(2 * var(--pvw, 1vw)) calc(1.2 * var(--pvh, 1vh)) calc(1.4 * var(--pvw, 1vw)); margin-bottom: calc(1.1 * var(--pvh, 1vh)); font-size: max(1.125rem, calc(3.5 * var(--pvh, 1vh))); font-weight: 600; will-change: transform;
     position: relative; overflow: hidden;
 }
-/* Votes as a bar that grows behind the row: green loved it, orange it's OK, red not for me. */
+/* The score as a bar behind the row, coloured by the votes: green loved it, orange it's OK, red not for me. */
 .chart-row .bar { position: absolute; left: 0; top: 0; bottom: 0; right: 0; z-index: 0; display: flex; }
 .chart-row .seg { width: 0; transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .chart-row .seg[data-kind="happy"] { background: #bfeccb; }
@@ -331,13 +331,10 @@ a.activity-hero.page:hover { transform: translateY(-2px); }
 .chart-row:first-child { border-color: var(--apple-blue); }
 .chart-row:first-child .pos { background: var(--apple-blue); border-color: var(--apple-blue); color: #fff; }
 .chart-row .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chart-row .move:empty { display: none; }
-.chart-row .move { font-size: max(0.875rem, calc(2.1 * var(--pvh, 1vh))); font-weight: 700; padding: calc(0.5 * var(--pvh, 1vh)) calc(1.5 * var(--pvh, 1vh)); border-radius: 999px; background: var(--apple-bg-page); color: var(--apple-text-secondary); white-space: nowrap; }
-.chart-row .move.up { background: #e3f8e9; color: #0f6f32; }
-.chart-row .move.down { background: #ffe9e7; color: #c4271d; }
-.chart-row .move.new { background: #e5f1ff; color: var(--apple-blue-text); }
 .chart-row .tally { display: flex; gap: calc(1.6 * var(--pvw, 1vw)); font-size: max(1rem, calc(2.8 * var(--pvh, 1vh))); font-weight: 600; white-space: nowrap; }
-.chart-row .pts { font-size: max(0.875rem, calc(2.4 * var(--pvh, 1vh))); color: var(--apple-text-primary); min-width: calc(10 * var(--pvh, 1vh)); text-align: right; white-space: nowrap; }
+.chart-row .pct { font-size: max(0.875rem, calc(2.4 * var(--pvh, 1vh))); color: var(--apple-text-primary); min-width: calc(15 * var(--pvh, 1vh)); text-align: right; white-space: nowrap; }
+.chart-row .pct:empty { display: none; }
+.chart-row .pts { font-size: max(1rem, calc(2.8 * var(--pvh, 1vh))); font-weight: 700; color: var(--apple-text-primary); min-width: calc(17 * var(--pvh, 1vh)); text-align: right; white-space: nowrap; }
 body.projector[data-feed="polling"] #meta::after { content: " · checking every 1.5s"; }
 
 /* The chart on a phone or at high zoom: the title wraps and the numbers sit under it,
@@ -345,7 +342,7 @@ body.projector[data-feed="polling"] #meta::after { content: " · checking every 
 @media (max-width: 700px) {
     .chart-row { grid-template-columns: max(2.5rem, calc(6 * var(--pvh, 1vh))) 1fr; row-gap: 0.4rem; }
     .chart-row .title { white-space: normal; }
-    .chart-row .move, .chart-row .tally, .chart-row .pts { grid-column: 2; justify-self: start; text-align: left; min-width: 0; }
+    .chart-row .tally, .chart-row .pct, .chart-row .pts { grid-column: 2; justify-self: start; text-align: left; min-width: 0; }
 }
 
 /* Windows High Contrast and other forced-colour modes drop background colours, which is
