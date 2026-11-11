@@ -42,7 +42,7 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
       return;
     }
     deliver({ t: 'share', purpose, prompt });
-    if (fromHome) closeShare(true); else finishSprint();
+    if (fromHome) closeShare(true); else finishSprint(true);
   };
 
   const field = {
@@ -140,7 +140,7 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
               {sending ? 'Sending...' : 'Submit'}
             </button>
             {!standalone && (
-              <button type="button" onClick={fromHome ? () => closeShare(false) : finishSprint} className="btn-secondary px-6 py-3 text-sm md:text-base">
+              <button type="button" onClick={fromHome ? () => closeShare(false) : () => finishSprint(false)} className="btn-secondary px-6 py-3 text-sm md:text-base">
                 {fromHome ? 'Back' : 'See results'}
               </button>
             )}

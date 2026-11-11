@@ -2,7 +2,7 @@ import { deliver } from '../../shared/client';
 import { COMMUNITY_LIMITS, shareProblem } from '../../shared/community';
 import type { CommunityItem, ReactionKind } from '../../shared/types';
 import { copyText, el, getCommunity, promptBody } from './api';
-import { FACES } from './faces';
+import { FACES, VOTE_FACES } from './faces';
 
 /** This browser's own votes and copies on community prompts, so a refresh keeps them. */
 function memory() {
@@ -60,7 +60,7 @@ export function mountCommunity(root: HTMLElement) {
       const unlocked = !item.prompt || state.copied.includes(item.id); // nothing to copy means nothing to wait for
       const mine = state.votes[item.id];
       const note = el('p', { class: 'vote-status', role: 'status' }, mine ? 'Vote counted. Tap another face to change your mind.' : '');
-      const faces = FACES.map(({ kind, emoji, label }) => {
+      const faces = VOTE_FACES.map(({ kind, emoji, label }) => {
         const b = el('button', { class: 'face', type: 'button', 'data-kind': kind, 'aria-pressed': String(mine === kind) },
           el('span', { class: 'face-emoji', 'aria-hidden': 'true' }, emoji), el('span', { class: 'face-label' }, label));
         b.disabled = !unlocked;
@@ -96,7 +96,8 @@ export function mountCommunity(root: HTMLElement) {
         });
         bar.append(copy);
       }
-      bar.append(verdict);
+      // Your own entry is for other people to judge: no faces, and it says why.
+      bar.append(item.mine ? el('span', { class: 'verdict-label own-entry' }, 'This one is yours. Other staff vote on it.') : verdict);
       const face = FACES.find((f) => f.kind === mine);
       const details = el('details', { 'data-id': String(item.id) },
         el('summary', {},

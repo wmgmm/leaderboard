@@ -45,7 +45,8 @@ interface AppState {
   // Sprint actions
   initSprint: (timed?: boolean) => void;
   vote: (kind: ReactionKind) => void;
-  finishSprint: () => void;
+  finishSprint: (shared?: boolean) => void;
+  sharedInSprint: boolean; // they answered the last card of this sprint: the results screen says thank you
   tickTimer: () => void;
   clearPicks: () => void;
 
@@ -112,6 +113,7 @@ export const useAppStore = create<AppState>()(
           shareFromHome: false,
           justShared: false,
           hasSprinted: true,
+          sharedInSprint: false,
           view: 'sprint',
         });
       },
@@ -138,7 +140,8 @@ export const useAppStore = create<AppState>()(
       },
 
       // On to the results after that last card, whether they submitted or not.
-      finishSprint: () => set({ view: 'results' }),
+      finishSprint: (shared = false) => set({ view: 'results', sharedInSprint: shared }),
+      sharedInSprint: false,
 
       tickTimer: () => {
         const { timerSeconds } = get();

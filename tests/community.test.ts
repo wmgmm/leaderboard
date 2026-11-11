@@ -74,4 +74,17 @@ describe('community prompts', () => {
     expect((await share('voter-flood', 'One too many')).status).toBe(429);
     expect((await share('voter-other', 'Someone else is fine')).status).toBe(201);
   });
+  it('does not let people vote on their own entry, and tells them which entries are theirs', async () => {
+    const mine = await (await share('voter-ffff', 'Drafting a risk register')).json() as { id: number };
+    const own = await react(mine.id, 'voter-ffff', 'happy');
+    expect(own.status).toBe(403);
+    expect((await own.json()).error).toMatch(/your own/);
+    expect((await react(mine.id, 'voter-gggg', 'happy')).status).toBe(204);
+    const asMe = (await (await app.request('/api/community', { headers: { 'x-voter': 'voter-ffff' } })).json()) as CommunityItem[];
+    expect(asMe.find((i) => i.id === mine.id)).toMatchObject({ mine: true, happy: 1 });
+    expect(asMe.filter((i) => i.mine).length).toBe(1);
+    const asOther = (await (await app.request('/api/community', { headers: { 'x-voter': 'voter-gggg' } })).json()) as CommunityItem[];
+    expect(asOther.some((i) => i.mine)).toBe(false);
+    expect((await list()).some((i) => i.mine)).toBe(false); // nobody named: nothing marked
+  });
 });

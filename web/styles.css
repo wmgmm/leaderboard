@@ -187,6 +187,7 @@ details[open] summary { color: var(--apple-blue); }
 /* --- Community prompts --- */
 .share-form { margin-bottom: 18px; padding: 18px; background: var(--apple-bg-page); border-radius: 12px; }
 .share-form label { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+.own-entry { font-size: 0.9375rem; color: var(--apple-text-secondary); }
 .share-reassure { margin: 6px 0 0; font-size: 1rem; color: var(--apple-text-secondary); }
 .share-form .optional { font-weight: 400; color: var(--apple-text-secondary); }
 .share-form input, .share-form textarea {
@@ -233,23 +234,24 @@ details.idea-only[open] summary::after { content: 'Close'; }
    set by projector.ts so that the browser's own zoom still makes everything bigger or smaller.
    Plain vh and vw cancel zoom out. */
 body.projector { padding: calc(3 * var(--pvh, 1vh)) calc(4 * var(--pvw, 1vw)); min-height: 100vh; }
-/* --- The chart's banner: the warm "Community Top of the Prompts" banner from the workshop
-   page (.activity-hero.community there), sized for a projector. Keep the two in step. --- */
+/* --- The banner: the same blue banner that links here from the top of the workshop page
+   (thematts/workshop.html, .activity-hero), so the two read as one thing. Keep them in step.
+   The base rules are sized for the projector; .activity-hero.page has the workshop's own sizes. --- */
 .activity-hero {
     display: block; padding: 4px; border-radius: var(--radius-card); color: white;
-    background: #1a0d14; box-shadow: var(--shadow-card); position: relative; overflow: hidden; isolation: isolate;
+    background: #0b1220; box-shadow: var(--shadow-card); position: relative; overflow: hidden; isolation: isolate; text-decoration: none;
 }
 .activity-hero::before {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
     background:
-        radial-gradient(circle at 18% 22%, rgba(251, 146, 60, 0.55) 0%, transparent 42%),
-        radial-gradient(circle at 82% 18%, rgba(236, 72, 153, 0.48) 0%, transparent 46%),
-        radial-gradient(circle at 70% 88%, rgba(244, 63, 94, 0.40) 0%, transparent 48%),
-        radial-gradient(circle at 8% 90%, rgba(250, 204, 21, 0.32) 0%, transparent 50%);
+        radial-gradient(circle at 18% 22%, rgba(56, 189, 248, 0.55) 0%, transparent 42%),
+        radial-gradient(circle at 82% 18%, rgba(99, 102, 241, 0.50) 0%, transparent 46%),
+        radial-gradient(circle at 70% 88%, rgba(139, 92, 246, 0.42) 0%, transparent 48%),
+        radial-gradient(circle at 8% 90%, rgba(14, 165, 233, 0.35) 0%, transparent 50%);
 }
 .activity-hero::after {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    background: linear-gradient(135deg, rgba(26, 13, 20, 0.10) 0%, rgba(26, 13, 20, 0.45) 100%);
+    background: linear-gradient(135deg, rgba(11, 18, 32, 0.10) 0%, rgba(11, 18, 32, 0.45) 100%);
 }
 .activity-hero > * { position: relative; z-index: 1; }
 .hero-glass {
@@ -259,13 +261,13 @@ body.projector { padding: calc(3 * var(--pvh, 1vh)) calc(4 * var(--pvw, 1vw)); m
     backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 .hero-icon {
-    width: max(36px, calc(7 * var(--pvh, 1vh))); height: max(36px, calc(7 * var(--pvh, 1vh))); color: #FFEDD5; flex-shrink: 0;
+    width: max(36px, calc(7 * var(--pvh, 1vh))); height: max(36px, calc(7 * var(--pvh, 1vh))); color: #E0F2FE; flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
     background: rgba(255, 255, 255, 0.08); border-radius: 10px; padding: max(6px, calc(1 * var(--pvh, 1vh)));
 }
 .hero-icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .hero-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.hero-eyebrow { font-size: max(0.75rem, calc(1.6 * var(--pvh, 1vh))); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 600; color: #FED7AA; display: block; }
+.hero-eyebrow { font-size: max(0.75rem, calc(1.6 * var(--pvh, 1vh))); text-transform: uppercase; letter-spacing: 0.18em; font-weight: 600; color: #BAE6FD; display: block; }
 .hero-title { font-size: max(1.5rem, calc(4.6 * var(--pvh, 1vh))); font-weight: 600; line-height: 1.2; margin: 0; color: white; letter-spacing: -0.015em; }
 .hero-desc { font-size: max(0.875rem, calc(2.1 * var(--pvh, 1vh))); line-height: 1.4; color: rgba(255, 255, 255, 0.78); margin: 0; }
 /* Where the workshop banner has its button, the chart shows how many people have voted. */
@@ -278,6 +280,22 @@ body.projector { padding: calc(3 * var(--pvh, 1vh)) calc(4 * var(--pvw, 1vw)); m
     .hero-content { flex-basis: calc(100% - 56px); }
     .hero-desc { display: none; }
 }
+
+/* The banner on an ordinary page (the list of prompts): the workshop page's exact sizes. */
+.activity-hero.page { margin: 28px 0 8px; transition: var(--transition); }
+a.activity-hero.page:hover { transform: translateY(-2px); }
+.activity-hero.page .hero-glass { gap: 20px; padding: 18px 22px; }
+.activity-hero.page .hero-icon { width: 36px; height: 36px; padding: 6px; }
+.activity-hero.page .hero-eyebrow { font-size: 10px; }
+.activity-hero.page .hero-title { font-size: 18px; }
+.activity-hero.page .hero-desc { font-size: 13px; color: rgba(255, 255, 255, 0.72); }
+.hero-cta {
+    display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; padding: 12px 26px; min-width: 150px;
+    background: var(--apple-blue); color: #fff; border-radius: var(--radius-button); white-space: nowrap; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(0, 113, 227, 0.35); transition: var(--transition);
+}
+.hero-under { text-align: center; margin: 14px 0 28px; color: var(--apple-text-secondary); }
+@media (max-width: 700px) { .activity-hero.page .hero-glass { padding: 16px; gap: 14px; } .hero-cta { width: 100%; } }
 
 /* The facilitator's views: the whole chart, or one slice of it. */
 #filters { display: flex; flex-wrap: wrap; gap: calc(1 * var(--pvh, 1vh)) calc(0.8 * var(--pvw, 1vw)); margin-top: calc(2 * var(--pvh, 1vh)); }

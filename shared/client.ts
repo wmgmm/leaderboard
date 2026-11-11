@@ -71,7 +71,8 @@ export function sendReaction(code: string, promptId: string, kind: ReactionKind 
   });
 }
 
-export const getCommunity = () => request<CommunityItem[]>('/api/community');
+// The anonymous id goes along so the server can mark which entries are this browser's own.
+export const getCommunity = () => request<CommunityItem[]>('/api/community', { headers: { 'x-voter': voterId() } });
 
 export function shareCommunity(purpose: string, prompt: string) {
   return request<{ id: number }>('/api/community', {

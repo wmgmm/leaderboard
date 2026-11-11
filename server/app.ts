@@ -148,15 +148,17 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
 
   // ---- Community prompts: one shared list for everyone, not tied to a session ----
 
-  async function communityList(): Promise<CommunityItem[]> {
-    const rows = await db.query<{ id: number; purpose: string; prompt: string; kind: ReactionKind | null; n: string | number }>(
-      `SELECT p.id, p.purpose, p.prompt, v.kind, count(v.voter) AS n
-       FROM (SELECT id, purpose, prompt FROM community_prompts WHERE NOT is_hidden ORDER BY id DESC LIMIT ${COMMUNITY_LIST_MAX * 2}) p
+  // `asker` is the anonymous id of the browser asking, if it said. Its own entries come back
+  // marked `mine`, so the page can say so instead of offering a vote. Nobody else's id is sent.
+  async function communityList(asker = ''): Promise<CommunityItem[]> {
+    const rows = await db.query<{ id: number; purpose: string; prompt: string; mine: boolean; kind: ReactionKind | null; n: string | number }>(
+      `SELECT p.id, p.purpose, p.prompt, p.mine, v.kind, count(v.voter) AS n
+       FROM (SELECT id, purpose, prompt, (voter = $1) AS mine FROM community_prompts WHERE NOT is_hidden ORDER BY id DESC LIMIT ${COMMUNITY_LIST_MAX * 2}) p
        LEFT JOIN community_votes v ON v.prompt_id = p.id
-       GROUP BY p.id, p.purpose, p.prompt, v.kind ORDER BY p.id DESC`);
+       GROUP BY p.id, p.purpose, p.prompt, p.mine, v.kind ORDER BY p.id DESC`, [asker]);
     const items = new Map<number, CommunityItem>();
     for (const r of rows) {
-      const item = items.get(r.id) ?? { id: r.id, purpose: r.purpose, prompt: r.prompt, points: 0, happy: 0, neutral: 0, sad: 0 };
+      const item = items.get(r.id) ?? { id: r.id, purpose: r.purpose, prompt: r.prompt, points: 0, happy: 0, neutral: 0, sad: 0, ...(r.mine ? { mine: true } : {}) };
       items.set(r.id, item);
       if (r.kind) {
         item[r.kind] = Number(r.n);
@@ -167,7 +169,10 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
     return Array.from(items.values()).sort((a, b) => b.points - a.points || b.id - a.id).slice(0, COMMUNITY_LIST_MAX);
   }
 
-  app.get('/api/community', async (c) => c.json(await communityList()));
+  app.get('/api/community', async (c) => {
+    const asker = c.req.header('x-voter') ?? '';
+    return c.json(await communityList(VOTER.test(asker) ? asker : ''));
+  });
 
   app.post('/api/community', async (c) => {
     // The kill switch. A 503 reads as "server away" to the pages, which hold the entry quietly.
@@ -209,8 +214,10 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
     const id = Number(c.req.param('id'));
     const flood = limits.check(addressOf(c), voter);
     if (flood) return c.json({ error: flood }, 429);
-    const found = await db.query('SELECT 1 FROM community_prompts WHERE id = $1 AND NOT is_hidden', [id]);
+    const found = await db.query<{ voter: string }>('SELECT voter FROM community_prompts WHERE id = $1 AND NOT is_hidden', [id]);
     if (!found.length) return c.json({ error: 'That prompt is no longer here' }, 404);
+    // The chart is other people's verdict on it, so the person who shared it has no vote.
+    if (kind !== null && found[0].voter === voter) return c.json({ error: "You can't vote on your own entry." }, 403);
     if (kind === null) {
       await db.query('DELETE FROM community_votes WHERE prompt_id = $1 AND voter = $2', [id, voter]);
     } else {

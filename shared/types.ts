@@ -44,6 +44,8 @@ export interface CommunityItem {
   happy: number;
   neutral: number;
   sad: number;
+  /** True when the browser asking is the one that shared it. Nobody votes on their own. */
+  mine?: boolean;
 }
 
 export interface PromptText {

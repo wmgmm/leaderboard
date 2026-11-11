@@ -10,7 +10,7 @@ import { PromptText } from '../shared/PromptText';
 import { CHART_URL, TRY_IT_URL, WORKSHOP_URL } from '../../lib/session';
 
 export function SprintResults() {
-  const { savedCases, votes, setView, setShowCtaModal, initSprint, clearPicks } = useAppStore();
+  const { savedCases, votes, setView, setShowCtaModal, initSprint, clearPicks, sharedInSprint } = useAppStore();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const voted = Object.keys(votes).length;
   // Picks are saved as whole cards; show today's wording for each, not the wording saved with it.
@@ -62,6 +62,11 @@ export function SprintResults() {
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Your votes are on the chart. Here are the prompts you loved.
           </p>
+          {sharedInSprint && (
+            <p role="status" className="text-sm font-semibold mt-2" style={{ color: '#1d7a3e' }}>
+              ✓ Thank you. Your answer has been added.
+            </p>
+          )}
 
           <div className="flex justify-center gap-4 mt-6">
             <div className="card px-6 py-4 text-center">
@@ -142,6 +147,10 @@ export function SprintResults() {
           // The same rows as the "View ALL the prompts" page, holding only the ones they loved.
           <section className="loved-card">
             <h2>The prompts you loved</h2>
+            <p className="how-to">
+              <strong>1. Copy</strong> a prompt. <strong>2. Paste</strong> it into Copilot. <strong>3. Swap</strong> the bold [bracket] for your own words.{' '}
+              <a href="https://m365copilot.com/" target="_blank" rel="noopener">Open Copilot ↗</a>
+            </p>
             {loved.map((uc, i) => (
               <details key={uc.id}>
                 <summary>

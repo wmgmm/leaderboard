@@ -3,7 +3,7 @@ import type { Board, Prompt, ReactionKind, SessionInfo } from '../../shared/type
 import { Offline, deliver, keepDelivering, waitingVotes } from '../../shared/client';
 import { copyText, el, getBoard, getMyVotes, getPrompts, getSession, promptBody } from './api';
 import { mountCommunity } from './community';
-import { FACES } from './faces';
+import { FACES, VOTE_FACES } from './faces';
 
 const main = document.getElementById('main')!;
 const params = new URLSearchParams(location.search);
@@ -74,7 +74,7 @@ function showSession(session: SessionInfo, prompts: Prompt[], mine: Record<strin
         el('strong', {}, '1. Copy'), ' a prompt.  ',
         el('strong', {}, '2. Try'), ' it in Copilot.  ',
         el('strong', {}, '3. Pick a face'), ' to vote.',
-        el('span', { class: 'instruction-tip' }, 'Using your own text? Leave out names and anything sensitive.'))),
+        el('span', { class: 'instruction-tip' }, 'Swap the bold [bracket] for your own words. Leave out names and anything sensitive.'))),
     progress);
 
   let refreshTags = () => {}; // set once the tags exist; called after each of your own votes
@@ -93,7 +93,7 @@ function showSession(session: SessionInfo, prompts: Prompt[], mine: Record<strin
     const copy = el('button', { class: 'btn-copy', type: 'button' }, 'Copy Prompt');
     const status = el('p', { class: 'vote-status', role: 'status' });
     let note = ''; // one-off message, such as a failed copy or a server error
-    const faces = FACES.map(({ kind, emoji, label }) => {
+    const faces = VOTE_FACES.map(({ kind, emoji, label }) => {
       const b = el('button', { class: 'face', type: 'button', 'data-kind': kind },
         el('span', { class: 'face-emoji', 'aria-hidden': 'true' }, emoji),
         el('span', { class: 'face-label' }, label));
