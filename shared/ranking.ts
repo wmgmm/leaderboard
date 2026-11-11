@@ -41,7 +41,9 @@ export function sortByScore<T extends Tally & { score?: number | null }>(rows: T
   return rows.slice().sort((a, b) => {
     const [na, nb] = [votesOf(a), votesOf(b)];
     if (!na || !nb) return (nb ? 1 : 0) - (na ? 1 : 0) || tie(a, b);
-    return steadied(b) - steadied(a) || nb - na || tie(a, b);
+    // By the score as shown. Level on screen: the higher % loved goes first (Matt,
+    // 11 Nov 2026), then the one with more votes behind it.
+    return b.score! - a.score! || b.happy / nb - a.happy / na || nb - na || tie(a, b);
   });
 }
 

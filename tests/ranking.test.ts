@@ -33,6 +33,13 @@ describe('rankByReactions', () => {
     expect(voted.every((s, i) => s >= 0 && s <= 10 && (i === 0 || s <= voted[i - 1]))).toBe(true);
   });
 
+  it('puts the higher % loved first when two prompts show the same score', () => {
+    // Today's live case (Matt, 11 Nov 2026): both show 8.1 among the same other votes.
+    // p01 is a hair ahead before rounding; on screen they are level.
+    const rows = rankByReactions(['p01', 'p02', 'p03'], [...votes('p01', 4, 1, 0), ...votes('p02', 3, 0, 0), ...votes('p03', 0, 1, 3)]);
+    expect(rows.slice(0, 2).map((r) => [r.id, r.score, lovedPercent(r)])).toEqual([['p02', 8.1, 100], ['p01', 8.1, 80]]);
+  });
+
   it('puts prompts nobody has voted on last, in session order, with no score', () => {
     const rows = rankByReactions(['p01', 'p02', 'p03'], votes('p03', 0, 0, 2));
     expect(rows.map((r) => [r.id, r.rank])).toEqual([['p03', 1], ['p01', 2], ['p02', 3]]);
