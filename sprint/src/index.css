@@ -189,38 +189,3 @@ button, a, input, [role="button"] {
 .loved-card .how-to { font-size: 14px; line-height: 1.5; color: var(--text-secondary); margin: 0 0 10px; }
 .loved-card .how-to strong { color: var(--text-primary); }
 .loved-card .how-to a { color: var(--apple-blue-dark); font-weight: 600; white-space: nowrap; }
-
-/* The first screen's banner: the blue banner from the top of the workshop page
-   (thematts/workshop.html, .activity-hero), which links here. Keep the two in step. */
-.top-banner {
-  width: 100%; max-width: 48rem; margin-bottom: 2rem; padding: 4px; border-radius: 22px; color: #fff; text-align: left;
-  background: #0b1220; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04); position: relative; overflow: hidden; isolation: isolate;
-}
-.top-banner::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(circle at 18% 22%, rgba(56, 189, 248, 0.55) 0%, transparent 42%),
-    radial-gradient(circle at 82% 18%, rgba(99, 102, 241, 0.50) 0%, transparent 46%),
-    radial-gradient(circle at 70% 88%, rgba(139, 92, 246, 0.42) 0%, transparent 48%),
-    radial-gradient(circle at 8% 90%, rgba(14, 165, 233, 0.35) 0%, transparent 50%);
-}
-.top-banner::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background: linear-gradient(135deg, rgba(11, 18, 32, 0.10) 0%, rgba(11, 18, 32, 0.45) 100%);
-}
-.top-banner > * { position: relative; z-index: 1; }
-.top-banner .glass-row {
-  display: flex; align-items: center; gap: 20px; padding: 18px 22px; border-radius: 18px;
-  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%);
-}
-.top-banner .icon {
-  width: 36px; height: 36px; padding: 6px; flex-shrink: 0; color: #E0F2FE; border-radius: 10px; background: rgba(255, 255, 255, 0.08);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.top-banner .icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.top-banner .words { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.top-banner .eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 600; color: #BAE6FD; }
-.top-banner h1 { font-size: 18px; font-weight: 600; line-height: 1.2; margin: 0; color: #fff; letter-spacing: -0.015em; }
-.top-banner .desc { font-size: 13px; line-height: 1.4; color: rgba(255, 255, 255, 0.72); }
-@media (forced-colors: active) { .top-banner { border: 1px solid CanvasText; } }

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
+import { CATEGORIES } from '../../data/categories';
 import { useCases } from '../../data/useCases';
 import { TRY_IT_URL } from '../../lib/session';
 
@@ -23,22 +24,26 @@ export function LandingPage() {
     >
       {/* Centred content grows to fill available space */}
       <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
-        {/* The same blue banner as the top of the workshop page, which links here. */}
-        <div className="top-banner">
-          <div className="glass-row">
-            <div className="icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 3v4" /><path d="M12 17v4" /><path d="M3 12h4" /><path d="M17 12h4" />
-                <path d="M5.6 5.6l2.8 2.8" /><path d="M15.6 15.6l2.8 2.8" /><path d="M5.6 18.4l2.8-2.8" /><path d="M15.6 8.4l2.8-2.8" />
-              </svg>
-            </div>
-            <div className="words">
-              <span className="eyebrow">Workshop Activity · 5 min</span>
-              <h1>Community Top of the Prompts</h1>
-              <span className="desc">Find your next experiment and share what is useful.</span>
-            </div>
-          </div>
+        {/* Category dots */}
+        <div className="flex gap-2 mb-8">
+          {CATEGORIES.map(cat => (
+            <div
+              key={cat.name}
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ background: cat.color }}
+            />
+          ))}
         </div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="text-5xl md:text-6xl font-bold mb-3"
+          style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em', fontFamily: "'Inter', sans-serif" }}
+        >
+          Community Top of the Prompts
+        </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}
