@@ -15,6 +15,7 @@ const CACHE = `totp-board-${code}`; // the last chart seen, shown at once and if
 // The views, in the order of their buttons, with what to say when a view is empty.
 const VIEWS: { key: FilterKey; label: string; empty: string }[] = [
   { key: 'all', label: 'The chart', empty: 'No prompts on the chart yet.' },
+  { key: 'today', label: '\u{1F4C5} Today', empty: 'No votes yet today. Somebody go first.' },
   { key: 'loved', label: '\u{1F600} Loved', empty: 'No clear favourites yet. Give it a minute.' },
   { key: 'marmite', label: '\u{1F937} Marmite', empty: 'Nothing is splitting the room yet.' },
   { key: 'disliked', label: '\u{1F641} Not landing', empty: 'Nothing disliked yet. Suspiciously polite.' },
@@ -35,12 +36,16 @@ const emptyNote = el('li', { class: 'chart-empty' });
 
 /** Only prompts that still exist: a saved chart can hold one that has since been removed. */
 const chartRows = () => (board ? board.rows.filter((row) => titles.has(row.id)) : []);
+/** Today's chart: its own scores and positions, from today's votes alone. */
+const todayRows = () => (board?.today ? board.today.rows.filter((row) => titles.has(row.id)) : []);
+const countOf = (key: FilterKey, rows: ReturnType<typeof chartRows>) =>
+  key === 'community' ? community.length : key === 'today' ? todayRows().length : applyFilter(key, rows).length;
 
 function rowsToShow(): Shown[] {
   if (view === 'community') {
     return community.map((c, i) => ({ id: `c${c.id}`, pos: i + 1, title: c.purpose, score: c.score ?? null, happy: c.happy, neutral: c.neutral, sad: c.sad }));
   }
-  return applyFilter(view, chartRows()).map((r) => ({ id: r.id, pos: r.rank, title: titles.get(r.id)!, score: r.score ?? null, happy: r.happy, neutral: r.neutral, sad: r.sad }));
+  return (view === 'today' ? todayRows() : applyFilter(view, chartRows())).map((r) => ({ id: r.id, pos: r.rank, title: titles.get(r.id)!, score: r.score ?? null, happy: r.happy, neutral: r.neutral, sad: r.sad }));
 }
 
 // The buttons are made once and then only updated: rebuilding them on every chart update
@@ -65,7 +70,7 @@ function drawFilters() {
   for (const v of VIEWS) {
     const { button, count } = filterButtons.get(v.key)!;
     button.setAttribute('aria-pressed', String(v.key === view));
-    count.textContent = String(v.key === 'community' ? community.length : applyFilter(v.key, rows).length);
+    count.textContent = String(countOf(v.key, rows));
   }
 }
 
@@ -129,7 +134,8 @@ function draw() {
   });
 
   if (board) {
-    meta.textContent = `${board.voters} ${board.voters === 1 ? 'voter' : 'voters'}`;
+    const voters = view === 'today' ? board.today?.voters ?? 0 : board.voters;
+    meta.textContent = `${voters} ${voters === 1 ? 'voter' : 'voters'}${view === 'today' ? ' today' : ''}`;
   }
 }
 
@@ -156,7 +162,8 @@ window.addEventListener('resize', sizeToWindow);
 
 const isBoard = (b: unknown): b is Board => {
   const x = b as Board | null;
-  return Boolean(x && x.session && Array.isArray(x.rows) && x.rows.every((r) => r && typeof r.id === 'string'));
+  const rows = (list: unknown) => Array.isArray(list) && list.every((r) => r && typeof r.id === 'string');
+  return Boolean(x && x.session && rows(x.rows) && (x.today === undefined || (x.today && rows(x.today.rows))));
 };
 
 async function start() {

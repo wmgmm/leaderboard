@@ -175,3 +175,28 @@ describe('the chart counts', () => {
     expect(res.rows.find((r) => r.id === 'p02')).toMatchObject({ happy: 2, recent: 1 });
   });
 });
+
+describe("today's chart", () => {
+  it("is built from today's votes alone, and leaves out prompts nobody voted on today", async () => {
+    const room = createApp(await openDb(), KEY);
+    const made = await room.request('/api/sessions', json('POST', { name: 'Day room', promptIds: ['p01', 'p02', 'p03'] }, auth));
+    const { code } = (await made.json()) as { code: string };
+    const vote = (voter: string, promptId: string, kind: string) => room.request(`/api/sessions/${code}/reactions`, json('PUT', { voter, promptId, kind }));
+    await vote('voter-day1', 'p01', 'sad');
+    await vote('voter-day2', 'p01', 'sad');
+    await vote('voter-day3', 'p02', 'happy');
+    const before = (await (await room.request(`/api/sessions/${code}/board`)).json()) as Board;
+    expect(before.today).toMatchObject({ voters: 3 });
+    expect(before.today!.rows.map((r) => [r.id, r.rank, r.happy, r.sad])).toEqual([['p02', 1, 1, 0], ['p01', 2, 0, 2]]);
+  });
+  it('drops votes from an earlier day, which stay on the main chart', async () => {
+    await db.query("INSERT INTO sessions (code, name, prompt_ids) VALUES ('DAYS', 'Days', $1)", [['p01', 'p02']]);
+    await db.query("INSERT INTO reactions (session_code, voter, prompt_id, kind, updated_at) VALUES ('DAYS', 'voter-old9', 'p01', 'happy', now() - interval '2 days')");
+    await app.request('/api/sessions/DAYS/reactions', json('PUT', { voter: 'voter-new9', promptId: 'p02', kind: 'neutral' }));
+    const b = (await (await app.request('/api/sessions/DAYS/board')).json()) as Board;
+    expect(b.voters).toBe(2);
+    expect(b.rows.find((r) => r.id === 'p01')!.happy).toBe(1);
+    expect(b.today!.voters).toBe(1);
+    expect(b.today!.rows.map((r) => r.id)).toEqual(['p02']);
+  });
+});

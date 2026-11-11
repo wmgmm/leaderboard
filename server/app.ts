@@ -19,6 +19,9 @@ const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTVWXYZ';
 const VOTER = /^[A-Za-z0-9-]{8,64}$/;
 // p = an exercise on the workshop page, x = an extra prompt kept in this repo.
 const PROMPT_ID = /^[px]\d{2,3}$/;
+// Midnight at the start of today in the UK, where the workshops are: a vote cast or changed
+// since then is one of "today's" for the chart's Today view.
+const TODAY_START = "date_trunc('day', now() AT TIME ZONE 'Europe/London') AT TIME ZONE 'Europe/London'";
 // How long a vote counts as "recent" for the Trending and Going viral tags.
 const RECENT_MINUTES = 5;
 
@@ -118,19 +121,25 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
   // Counted in the database: the answer is the same size however many votes there are.
   async function getBoard(session: SessionInfo): Promise<Board> {
     const [counts, voters] = await Promise.all([
-      db.query<{ prompt_id: string; kind: ReactionKind; n: string | number; recent: string | number }>(
+      db.query<{ prompt_id: string; kind: ReactionKind; n: string | number; recent: string | number; today: string | number }>(
         `SELECT prompt_id, kind, count(*) AS n,
-                count(*) FILTER (WHERE updated_at > now() - interval '${RECENT_MINUTES} minutes') AS recent
+                count(*) FILTER (WHERE updated_at > now() - interval '${RECENT_MINUTES} minutes') AS recent,
+                count(*) FILTER (WHERE updated_at >= ${TODAY_START}) AS today
          FROM reactions WHERE session_code = $1 AND prompt_id = ANY($2) GROUP BY prompt_id, kind`,
         [session.code, session.promptIds]),
-      db.query<{ n: string | number }>(
-        'SELECT count(DISTINCT voter) AS n FROM reactions WHERE session_code = $1 AND prompt_id = ANY($2)',
+      db.query<{ n: string | number; today: string | number }>(
+        `SELECT count(DISTINCT voter) AS n, count(DISTINCT voter) FILTER (WHERE updated_at >= ${TODAY_START}) AS today
+         FROM reactions WHERE session_code = $1 AND prompt_id = ANY($2)`,
         [session.code, session.promptIds]),
     ]);
+    // Today's chart: the same ranking, from today's votes alone, without the prompts nobody voted on today.
+    const today = rankByCounts(session.promptIds, counts.map((r) => ({ promptId: r.prompt_id, kind: r.kind, n: Number(r.today), recent: Number(r.recent) })))
+      .filter((r) => r.happy + r.neutral + r.sad > 0);
     return {
       session,
       voters: Number(voters[0]?.n ?? 0),
       rows: rankByCounts(session.promptIds, counts.map((r) => ({ promptId: r.prompt_id, kind: r.kind, n: Number(r.n), recent: Number(r.recent) }))),
+      today: { voters: Number(voters[0]?.today ?? 0), rows: today },
     };
   }
 

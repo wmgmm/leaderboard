@@ -1,8 +1,9 @@
 import type { BoardRow } from './types';
 
 // The views a facilitator can switch the chart between. "community" is the list staff
-// have added themselves, which comes from a different place, so it has no rule here.
-export type FilterKey = 'all' | 'loved' | 'marmite' | 'disliked' | 'unrated' | 'community';
+// have added themselves, and "today" is the chart from today's votes alone; both come
+// from a different place, so they have no rule here.
+export type FilterKey = 'all' | 'today' | 'loved' | 'marmite' | 'disliked' | 'unrated' | 'community';
 
 export const votesOf = (r: Pick<BoardRow, 'happy' | 'neutral' | 'sad'>) => r.happy + r.neutral + r.sad;
 
@@ -28,7 +29,7 @@ export function isDisliked(r: Pick<BoardRow, 'happy' | 'neutral' | 'sad'>): bool
  * The rows a view shows, in the order it shows them. Rows keep their chart position
  * (`rank`), so a filtered view still says where each prompt stands overall.
  */
-export function applyFilter(key: Exclude<FilterKey, 'community'>, rows: BoardRow[]): BoardRow[] {
+export function applyFilter(key: Exclude<FilterKey, 'community' | 'today'>, rows: BoardRow[]): BoardRow[] {
   switch (key) {
     case 'loved': return rows.filter(isLoved).sort((a, b) => b.happy - a.happy || a.rank - b.rank);
     // Most evenly split first: the size of the smaller camp.

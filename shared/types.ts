@@ -34,6 +34,9 @@ export interface Board {
   session: SessionInfo;
   voters: number;
   rows: BoardRow[];
+  // The chart from today's votes alone (UK day): only prompts voted on today, ranked and
+  // scored among themselves. A chart saved by an older page has none.
+  today?: { voters: number; rows: BoardRow[] };
 }
 
 /** A prompt a member of staff has shared in the Community prompts section. */
