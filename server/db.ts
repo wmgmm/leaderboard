@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS community_votes (
   updated_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (prompt_id, voter)
 );
+ALTER TABLE community_prompts ADD COLUMN IF NOT EXISTS is_approved boolean NOT NULL DEFAULT false;
 `;
 
 export async function openDb(databaseUrl?: string, dataDir?: string): Promise<Db> {

@@ -64,7 +64,7 @@ export function SprintResults() {
           </p>
           {sharedInSprint && (
             <p role="status" className="text-sm font-semibold mt-2" style={{ color: '#1d7a3e' }}>
-              ✓ Thank you. Your answer has been added.
+              ✓ Thank you. Your answer will appear once a facilitator has approved it.
             </p>
           )}
 

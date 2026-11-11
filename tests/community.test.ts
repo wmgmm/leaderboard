@@ -9,8 +9,19 @@ let app: ReturnType<typeof createApp>;
 const json = (method: string, body: unknown, headers: Record<string, string> = {}) => ({
   method, body: JSON.stringify(body), headers: { 'content-type': 'application/json', ...headers },
 });
-const share = (voter: string, purpose: string, prompt?: string) =>
+/** Sends a suggestion as an attendee would. It waits for the facilitator. */
+const submit = (voter: string, purpose: string, prompt?: string) =>
   app.request('/api/community', json('POST', { voter, purpose, prompt }));
+const approve = (id: number, key = KEY) =>
+  app.request(`/api/community/${id}/approve`, { method: 'POST', headers: { 'x-facilitator-key': key } });
+const waiting = async () =>
+  (await (await app.request('/api/community/waiting', { headers: { 'x-facilitator-key': KEY } })).json()) as CommunityItem[];
+/** A suggestion the facilitator has approved, which is what most tests are about. */
+const share = async (voter: string, purpose: string, prompt?: string) => {
+  const res = await submit(voter, purpose, prompt);
+  if (res.status === 201) await approve(((await res.clone().json()) as { id: number }).id);
+  return res;
+};
 const react = (id: number, voter: string, kind: string | null) =>
   app.request(`/api/community/${id}/reactions`, json('PUT', { voter, kind }));
 const list = async () => (await (await app.request('/api/community')).json()) as CommunityItem[];
@@ -18,7 +29,28 @@ const list = async () => (await (await app.request('/api/community')).json()) as
 beforeAll(async () => { app = createApp(await openDb(), KEY); });
 
 describe('community prompts', () => {
-  it('publishes a prompt straight away, and the prompt text is optional', async () => {
+  it('shows nothing until the facilitator approves it', async () => {
+    const res = await submit('voter-wait', 'Summarising a long report');
+    expect(res.status).toBe(201);
+    const { id } = (await res.json()) as { id: number };
+    expect(await list()).toEqual([]);
+    expect((await react(id, 'voter-zzzz', 'happy')).status).toBe(404); // nothing to vote on yet
+    expect((await app.request('/api/community/waiting')).status).toBe(401);
+    expect((await waiting()).map((i) => i.purpose)).toEqual(['Summarising a long report']);
+    expect((await approve(id, 'wrong')).status).toBe(401);
+    expect((await approve(id)).status).toBe(204);
+    expect((await list()).map((i) => i.purpose)).toEqual(['Summarising a long report']);
+    expect(await waiting()).toEqual([]);
+    // Removing works on a waiting entry too, and tidies up after this test.
+    const other = (await (await submit('voter-wait', 'Something to turn down')).json()) as { id: number };
+    for (const n of [other.id, id]) {
+      expect((await app.request(`/api/community/${n}`, { method: 'DELETE', headers: { 'x-facilitator-key': KEY } })).status).toBe(204);
+    }
+    expect(await waiting()).toEqual([]);
+    expect(await list()).toEqual([]);
+  });
+
+  it('lists an approved prompt, and the prompt text is optional', async () => {
     expect((await share('voter-aaaa', '  Tidying   meeting notes ', 'Turn these notes into actions: [notes]')).status).toBe(201);
     expect((await share('voter-bbbb', 'Planning my week')).status).toBe(201);
     const items = await list();

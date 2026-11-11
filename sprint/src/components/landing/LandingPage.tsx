@@ -135,7 +135,7 @@ export function LandingPage() {
         </motion.div>
 
         <p role="status" className="text-sm mt-4 min-h-[1.25rem]" style={{ color: 'var(--text-secondary)' }}>
-          {justShared ? 'Shared. Thank you.' : ''}
+          {justShared ? 'Thank you. It will appear once a facilitator has approved it.' : ''}
         </p>
       </div>
 

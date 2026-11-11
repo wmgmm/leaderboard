@@ -60,7 +60,7 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
           <p className="text-4xl mb-3" aria-hidden="true">🎉</p>
           <h2 className="text-xl md:text-3xl font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>Thank you</h2>
           <p className="text-sm md:text-base mb-6" style={{ color: 'var(--text-secondary)' }}>
-            Your answer has been added for other staff to see.
+            Other staff will see your answer once a facilitator has approved it.
           </p>
           <button type="button" onClick={() => setThanked(false)} className="btn-secondary px-6 py-3 text-sm md:text-base">
             Add another
@@ -131,7 +131,7 @@ export function ShareCard({ standalone = false }: { standalone?: boolean }) {
           />
 
           <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-            Everyone sees it straight away. No names or anything sensitive.
+            It appears once a facilitator has approved it. No names or anything sensitive.
           </p>
           <p id="share-problem" role="alert" className="text-sm mb-3 min-h-[1.25rem]" style={{ color: 'var(--apple-red-text)' }}>{problem}</p>
 

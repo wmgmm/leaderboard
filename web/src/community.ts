@@ -33,7 +33,7 @@ export function mountCommunity(root: HTMLElement) {
     el('label', { for: 'share-purpose' }, 'What do you use AI for?'), purpose,
     el('label', { for: 'share-prompt' }, 'Your prompt ', el('span', { class: 'optional' }, '(optional)')), prompt,
     el('div', { class: 'action-bar' }, button,
-      el('span', { class: 'instruction-tip' }, 'Everyone sees it straight away. No names or anything sensitive.')),
+      el('span', { class: 'instruction-tip' }, 'It appears here once a facilitator has approved it. No names or anything sensitive.')),
     status);
   const list = el('div', { class: 'community-list' });
 
@@ -148,7 +148,7 @@ export function mountCommunity(root: HTMLElement) {
     const job = { t: 'share' as const, purpose: purpose.value, prompt: prompt.value };
     purpose.value = '';
     prompt.value = '';
-    status.textContent = 'Shared. Thank you.';
+    status.textContent = 'Thank you. It will appear once a facilitator has approved it.';
     deliver(job).then((refused) => {
       if (refused) {
         // The server said no (too many this hour, say): give their words back with the reason.

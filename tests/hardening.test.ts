@@ -14,7 +14,12 @@ const json = (method: string, body: unknown, headers: Record<string, string> = {
   method, body: JSON.stringify(body), headers: { 'content-type': 'application/json', ...headers },
 });
 const list = async () => (await (await app.request('/api/community')).json()) as CommunityItem[];
-const share = (voter: string, purpose: string, prompt = '') => app.request('/api/community', json('POST', { voter, purpose, prompt }));
+/** A suggestion sent in and then approved by the facilitator, so it is on the list. */
+const share = async (voter: string, purpose: string, prompt = '') => {
+  const res = await app.request('/api/community', json('POST', { voter, purpose, prompt }));
+  if (res.status === 201) await app.request(`/api/community/${((await res.clone().json()) as { id: number }).id}/approve`, { method: 'POST', headers: auth });
+  return res;
+};
 
 beforeAll(async () => {
   db = await openDb();

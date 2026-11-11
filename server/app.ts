@@ -150,12 +150,14 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
 
   // `asker` is the anonymous id of the browser asking, if it said. Its own entries come back
   // marked `mine`, so the page can say so instead of offering a vote. Nobody else's id is sent.
-  async function communityList(asker = ''): Promise<CommunityItem[]> {
+  // Matt, 11 Nov 2026: nothing is listed until a facilitator has approved it. `approved`
+  // false gives the ones still waiting, which only the facilitator page may ask for.
+  async function communityList(asker = '', approved = true): Promise<CommunityItem[]> {
     const rows = await db.query<{ id: number; purpose: string; prompt: string; mine: boolean; kind: ReactionKind | null; n: string | number }>(
       `SELECT p.id, p.purpose, p.prompt, p.mine, v.kind, count(v.voter) AS n
-       FROM (SELECT id, purpose, prompt, (voter = $1) AS mine FROM community_prompts WHERE NOT is_hidden ORDER BY id DESC LIMIT ${COMMUNITY_LIST_MAX * 2}) p
+       FROM (SELECT id, purpose, prompt, (voter = $1) AS mine FROM community_prompts WHERE NOT is_hidden AND is_approved = $2 ORDER BY id DESC LIMIT ${COMMUNITY_LIST_MAX * 2}) p
        LEFT JOIN community_votes v ON v.prompt_id = p.id
-       GROUP BY p.id, p.purpose, p.prompt, p.mine, v.kind ORDER BY p.id DESC`, [asker]);
+       GROUP BY p.id, p.purpose, p.prompt, p.mine, v.kind ORDER BY p.id DESC`, [asker, approved]);
     const items = new Map<number, CommunityItem>();
     for (const r of rows) {
       const item = items.get(r.id) ?? { id: r.id, purpose: r.purpose, prompt: r.prompt, points: 0, happy: 0, neutral: 0, sad: 0, ...(r.mine ? { mine: true } : {}) };
@@ -172,6 +174,20 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
   app.get('/api/community', async (c) => {
     const asker = c.req.header('x-voter') ?? '';
     return c.json(await communityList(VOTER.test(asker) ? asker : ''));
+  });
+
+  // What has been sent in and is waiting for a yes or a no.
+  app.get('/api/community/waiting', async (c) => {
+    if (!(await isFacilitator(c))) return c.json({ error: 'Facilitator key needed' }, 401);
+    return c.json(await communityList('', false));
+  });
+
+  app.post('/api/community/:id/approve', async (c) => {
+    if (!(await isFacilitator(c))) return c.json({ error: 'Facilitator key needed' }, 401);
+    if (!COMMUNITY_ID.test(c.req.param('id'))) return c.json({ error: 'No such prompt' }, 404);
+    const rows = await db.query(
+      'UPDATE community_prompts SET is_approved = true WHERE id = $1 AND NOT is_hidden RETURNING id', [Number(c.req.param('id'))]);
+    return rows.length ? c.body(null, 204) : c.json({ error: 'No such prompt' }, 404);
   });
 
   app.post('/api/community', async (c) => {
@@ -214,7 +230,7 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
     const id = Number(c.req.param('id'));
     const flood = limits.check(addressOf(c), voter);
     if (flood) return c.json({ error: flood }, 429);
-    const found = await db.query<{ voter: string }>('SELECT voter FROM community_prompts WHERE id = $1 AND NOT is_hidden', [id]);
+    const found = await db.query<{ voter: string }>('SELECT voter FROM community_prompts WHERE id = $1 AND NOT is_hidden AND is_approved', [id]);
     if (!found.length) return c.json({ error: 'That prompt is no longer here' }, 404);
     // The chart is other people's verdict on it, so the person who shared it has no vote.
     if (kind !== null && found[0].voter === voter) return c.json({ error: "You can't vote on your own entry." }, 403);

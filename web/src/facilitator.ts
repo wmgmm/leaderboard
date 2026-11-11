@@ -3,7 +3,8 @@ import type { CommunityItem } from '../../shared/types';
 import { el } from './api';
 import { FACES } from './faces';
 
-// The facilitator's page: take down a community prompt, undo a flood, clear votes.
+// The facilitator's page: approve or turn down a community prompt, take one down, undo a
+// flood, clear votes.
 // Everything here needs the passphrase, which the server checks on every request.
 // It is kept for this browser tab only (sessionStorage), never saved to the device.
 
@@ -78,13 +79,45 @@ function showTools() {
   const said = el('p', { class: 'vote-status', role: 'status' });
   const report = (text: string) => { said.textContent = text; refresh(); };
   const list = el('div', {});
+  const waitingList = el('div', {});
   const minutesBox = (id: string) => el('input', { type: 'number', id, min: '1', max: '1440', value: '15', class: 'minutes' });
   const minutesOf = (box: HTMLInputElement) => Math.min(1440, Math.max(1, Math.round(Number(box.value) || 15)));
 
   const floodMinutes = minutesBox('flood-minutes');
   const voteMinutes = minutesBox('vote-minutes');
 
+  const remove = (item: CommunityItem) => careful('Remove', 'Sure? Remove', async () => {
+    await call(`/api/community/${item.id}`, 'DELETE');
+    return `Removed: "${item.purpose}". Its words are wiped from the database.`;
+  }, report);
+
+  // Nothing an attendee shares is shown to anyone until it is approved here.
+  async function refreshWaiting() {
+    let items: CommunityItem[];
+    try { items = await call<CommunityItem[]>('/api/community/waiting'); } catch { return; } // keep what is showing
+    if (!items.length) {
+      waitingList.replaceChildren(el('p', { class: 'muted' }, 'Nothing is waiting.'));
+      return;
+    }
+    waitingList.replaceChildren(...items.map((item) => {
+      const approve = el('button', { type: 'button', class: 'btn-copy' }, 'Approve');
+      approve.addEventListener('click', async () => {
+        approve.disabled = true;
+        try {
+          await call(`/api/community/${item.id}/approve`, 'POST');
+          report(`Approved: "${item.purpose}". It is now on the pages.`);
+        } catch (err) { report((err as Error).message); }
+      });
+      return el('div', { class: 'facilitator-row' },
+        el('div', { class: 'facilitator-text' },
+          el('strong', {}, item.purpose),
+          item.prompt ? el('p', { class: 'muted' }, item.prompt) : ''),
+        approve, remove(item));
+    }));
+  }
+
   async function refresh() {
+    refreshWaiting();
     let items: CommunityItem[] = [];
     try { items = await fetch(API + '/api/community').then((r) => r.json()); } catch { /* shown as none */ }
     if (!items.length) {
@@ -96,18 +129,20 @@ function showTools() {
         el('strong', {}, item.purpose),
         item.prompt ? el('p', { class: 'muted' }, item.prompt) : '',
         el('p', { class: 'tally' }, FACES.map((f) => `${f.emoji} ${item[f.kind]}`).join('  '))),
-      careful('Remove', 'Sure? Remove', async () => {
-        await call(`/api/community/${item.id}`, 'DELETE');
-        return `Removed: "${item.purpose}". Its words are wiped from the database.`;
-      }, report))));
+      remove(item))));
   }
 
   main.replaceChildren(
     el('section', { class: 'section-card' },
       el('div', { class: 'eyebrow' }, 'Community prompts'),
+      el('h2', {}, 'Waiting for your approval'),
+      el('p', { class: 'muted' }, 'Nobody else sees these until you approve them. Removing is for good: the words are wiped.'),
+      said, waitingList),
+    el('section', { class: 'section-card' },
+      el('div', { class: 'eyebrow' }, 'Community prompts'),
       el('h2', {}, 'Take something down'),
-      el('p', { class: 'muted' }, 'Removing is for good: the entry leaves every page and its words are wiped. Page viewers see it go within 20 seconds.'),
-      said, list,
+      el('p', { class: 'muted' }, 'These are approved and showing. Removing is for good: the entry leaves every page and its words are wiped. Page viewers see it go within 20 seconds.'),
+      list,
       el('div', { class: 'facilitator-bulk' },
         el('label', { for: 'flood-minutes' }, 'A flood? Remove everything added in the last'), floodMinutes, el('span', {}, 'minutes'),
         careful('Remove them all', 'Sure? Remove them all', async () => {

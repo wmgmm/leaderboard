@@ -61,18 +61,23 @@ export function SwipeCard() {
   const commit = (kind: ReactionKind) => {
     if (leaving.current) return;
     leaving.current = true;
-    const out = EXIT[kind];
-    Promise.all([
-      animate(x, out.x, { type: 'tween', duration: reduceMotion ? 0 : 0.25 }),
-      animate(y, out.y, { type: 'tween', duration: reduceMotion ? 0 : 0.25 }),
-    ]).then(() => {
+    const next = () => {
       if (kind === 'happy') pulse(10);
       vote(kind);
       x.set(0);
       y.set(0);
       setKey(k => k + 1);
       leaving.current = false;
-    });
+    };
+    // No fly-out at all with reduced motion. A zero-length animation is not the same thing:
+    // it lands a frame after its promise resolves, which moved the next card off screen
+    // and left a blank one (the workshop of 11 Nov 2026).
+    if (reduceMotion) { next(); return; }
+    const out = EXIT[kind];
+    Promise.all([
+      animate(x, out.x, { type: 'tween', duration: 0.25 }),
+      animate(y, out.y, { type: 'tween', duration: 0.25 }),
+    ]).then(next);
   };
 
   const bind = useDrag(
