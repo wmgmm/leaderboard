@@ -136,6 +136,8 @@ export function mountCommunity(root: HTMLElement) {
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+    // A double tap on the button: the first sent it and emptied the form. Leave the thank-you be.
+    if (!purpose.value && !prompt.value && status.textContent!.startsWith('Thank you')) return;
     // Checked here first, so a bad entry is refused at once, server or no server.
     const problem = shareProblem(purpose.value, prompt.value);
     if (problem) {

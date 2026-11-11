@@ -29,13 +29,18 @@ export function lovedPercent(t: Tally): number | null {
 // is simply its average face.
 export const PRIOR_VOTES = 5;
 
+/** The average face across a whole chart, on 0..1; the middle with no votes at all. */
+export function averageLiked(rows: Tally[]): number {
+  const total = rows.reduce((sum, r) => sum + votesOf(r), 0);
+  return total ? rows.reduce((sum, r) => sum + liked(r), 0) / total : 0.5;
+}
+
 /**
  * Best first by score, with the score written on each row (null with no votes). Prompts
- * with no votes go last. `tie` settles the order between equals and among the unvoted.
+ * with no votes go last. `tie` settles the order between equals and among the unvoted. `average` is what scores
+ * are steadied towards: the rows' own unless another chart's is given.
  */
-export function sortByScore<T extends Tally & { score?: number | null }>(rows: T[], tie: (a: T, b: T) => number): T[] {
-  const total = rows.reduce((sum, r) => sum + votesOf(r), 0);
-  const average = total ? rows.reduce((sum, r) => sum + liked(r), 0) / total : 0.5;
+export function sortByScore<T extends Tally & { score?: number | null }>(rows: T[], tie: (a: T, b: T) => number, average = averageLiked(rows)): T[] {
   const steadied = (r: T) => (liked(r) + PRIOR_VOTES * average) / (votesOf(r) + PRIOR_VOTES);
   for (const r of rows) r.score = votesOf(r) ? Math.round(steadied(r) * 100) / 10 : null;
   return rows.slice().sort((a, b) => {
@@ -51,7 +56,7 @@ export function sortByScore<T extends Tally & { score?: number | null }>(rows: T
 export interface Count { promptId: string; kind: ReactionKind; n: number; recent: number }
 
 /** Chart rows, best first, from counts. Ties keep the session's own prompt order. */
-export function rankByCounts(promptIds: string[], counts: Count[]): BoardRow[] {
+export function rankByCounts(promptIds: string[], counts: Count[], average?: number): BoardRow[] {
   const rows = new Map<string, BoardRow>();
   for (const id of promptIds) rows.set(id, { id, rank: 0, points: 0, score: null, happy: 0, neutral: 0, sad: 0, recent: 0 });
   for (const c of counts) {
@@ -63,7 +68,7 @@ export function rankByCounts(promptIds: string[], counts: Count[]): BoardRow[] {
   }
   const order = new Map<string, number>();
   promptIds.forEach((id, i) => order.set(id, i));
-  const sorted = sortByScore(Array.from(rows.values()), (a, b) => order.get(a.id)! - order.get(b.id)!);
+  const sorted = sortByScore(Array.from(rows.values()), (a, b) => order.get(a.id)! - order.get(b.id)!, average);
   sorted.forEach((row, i) => (row.rank = i + 1));
   return sorted;
 }

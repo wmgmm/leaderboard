@@ -53,9 +53,12 @@ export function SwipeCard() {
   // otherwise an upward swipe that starts on the prompt would be swallowed as a scroll.
   const promptBox = useRef<HTMLDivElement>(null);
   const [promptScrolls, setPromptScrolls] = useState(false);
+  const [readToEnd, setReadToEnd] = useState(false); // the long prompt has been scrolled to its last line
   useLayoutEffect(() => {
     const box = promptBox.current;
-    setPromptScrolls(Boolean(box && box.scrollHeight > box.clientHeight + 1));
+    // A near fit is not a scroll: a few pixels over must not take the swipe up away.
+    setPromptScrolls(Boolean(box && box.scrollHeight > box.clientHeight + 8));
+    setReadToEnd(false);
   }, [currentCardIndex]);
 
   const commit = (kind: ReactionKind) => {
@@ -66,8 +69,10 @@ export function SwipeCard() {
       // Whatever goes wrong in recording the vote (browser storage full, say), the next
       // card must still come up: otherwise the screen is left blank and stuck.
       try { vote(kind); } finally {
-        x.set(0);
-        y.set(0);
+        // jump, not set: it also stops a fly-out that is still running (frames paused by a
+        // hidden tab, say), which would otherwise carry the new card off screen.
+        x.jump(0);
+        y.jump(0);
         setKey(k => k + 1);
         // A double tap must not also vote on the card that has only just appeared:
         // nobody has read it in a quarter of a second.
@@ -115,7 +120,10 @@ export function SwipeCard() {
       // Not a held-down key (which would vote on card after card), not a browser shortcut
       // such as Alt+Left for Back, and not while the keyboard is scrolling the prompt text.
       if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      if (e.target instanceof Element && e.target.closest('[data-scroll]')) return;
+      // Only the up arrow scrolls the prompt, and only a prompt longer than its box. A click
+      // on the text puts the keyboard there, and must not switch the arrow keys off.
+      const box = e.target instanceof Element ? e.target.closest('[data-scroll]') : null;
+      if (box && e.key === 'ArrowUp' && box.scrollHeight > box.clientHeight + 8) return;
       if (e.key === 'ArrowRight') commit('happy');
       if (e.key === 'ArrowLeft') commit('sad');
       if (e.key === 'ArrowUp') { e.preventDefault(); commit('neutral'); }
@@ -238,7 +246,7 @@ export function SwipeCard() {
 
           {/* Title */}
           <h2
-            className="text-xl md:text-3xl [@media(max-height:46em)]:text-2xl font-bold mb-1.5 leading-tight shrink-0"
+            className="text-xl md:text-3xl md:[@media(max-height:46em)]:text-2xl font-bold mb-1.5 leading-tight shrink-0"
             style={{ color: 'var(--text-primary)', textWrap: 'balance' }}
           >
             {card.title}
@@ -252,18 +260,31 @@ export function SwipeCard() {
           {/* The prompt, with the part to change in bold. The box fills the rest of the card,
               so it is the same size on every card; a short prompt sits in the middle of it
               and a long one scrolls. */}
+          <div className="relative flex-1 min-h-0 flex flex-col">
           <div
             ref={promptBox}
             tabIndex={0} role="group" aria-label="Prompt text" data-scroll
+            onScroll={(e) => { const b = e.currentTarget; setReadToEnd(b.scrollTop + b.clientHeight >= b.scrollHeight - 8); }}
             className="rounded-xl px-4 py-3 md:px-6 md:py-5 flex-1 min-h-0 overflow-auto flex flex-col focus-visible:outline-2 focus-visible:outline-[#0071e3]"
             style={{ background: 'var(--bg-page)', touchAction: promptScrolls ? 'pan-y' : 'none' }}
           >
             <p
-              className="my-auto text-sm md:text-lg [@media(max-height:46em)]:text-base leading-relaxed whitespace-pre-line"
+              className="my-auto text-sm md:text-lg md:[@media(max-height:46em)]:text-base leading-relaxed whitespace-pre-line"
               style={{ color: 'var(--text-primary)', textWrap: 'pretty' }}
             >
               <PromptText text={card.prompt} />
             </p>
+          </div>
+          {/* A prompt longer than its box: say so, or people vote on half of it. */}
+          {promptScrolls && !readToEnd && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 bottom-0 rounded-b-xl pt-6 pb-1.5 text-center text-xs font-semibold pointer-events-none"
+              style={{ color: 'var(--text-secondary)', background: 'linear-gradient(to bottom, transparent, var(--bg-page) 55%)' }}
+            >
+              {'\u2193'} Scroll for the rest
+            </div>
+          )}
           </div>
 
           {/* What the bold part could be instead: two is enough on a card. With an

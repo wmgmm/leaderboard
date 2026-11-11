@@ -7,7 +7,8 @@ const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const LONG_NUMBER = /(?:\d[\s-]?){9,}/; // phone, account or reference numbers
 
 // Characters that are not text: a database refuses some of them, and none belong in a prompt.
-const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
+// Also the invisible ones that make a blank title or turn the text back to front.
+const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B\u2060\uFEFF\u202A-\u202E\u2066-\u2069]/g;
 
 /** The purpose as it will be stored: one line, single spaces. */
 export const tidyPurpose = (purpose: string) => purpose.replace(CONTROL, '').replace(/\s+/g, ' ').trim();

@@ -21,7 +21,10 @@ async function call<T>(path: string, method = 'GET', body?: unknown): Promise<T>
     method,
     headers: { 'x-facilitator-key': passphrase, ...(body === undefined ? {} : { 'content-type': 'application/json' }) },
     body: body === undefined ? undefined : JSON.stringify(body),
-  }).catch(() => { throw new Error('The vote server did not answer. Try again in a moment.'); }).finally(() => clearTimeout(timer));
+  }).catch(() => {
+    // No answer is not a refusal: a clear or a remove may have gone through all the same.
+    throw new Error(method === 'GET' ? 'The vote server did not answer. Try again in a moment.' : 'No answer from the vote server. It may still have gone through: check before trying again.');
+  }).finally(() => clearTimeout(timer));
   if (res.status === 401) throw new Error('That passphrase was not accepted.');
   if (!res.ok) {
     const problem = await res.json().catch(() => null);
@@ -34,15 +37,18 @@ async function call<T>(path: string, method = 'GET', body?: unknown): Promise<T>
  * A button that asks once more before doing something that cannot be undone:
  * the first press changes its wording, the second within a few seconds does it.
  */
-function careful(label: string, sure: string, act: () => Promise<string>, report: (text: string) => void) {
+function careful(label: string, sure: string | (() => string), act: () => Promise<string>, report: (text: string) => void) {
   const button = el('button', { type: 'button', class: 'btn-copy danger' }, label);
   let armed = 0;
+  let armedAt = 0;
   button.addEventListener('click', async () => {
     if (!armed) {
-      button.textContent = sure;
+      button.textContent = typeof sure === 'string' ? sure : sure();
+      armedAt = Date.now();
       armed = window.setTimeout(() => { armed = 0; button.textContent = label; }, 5000);
       return;
     }
+    if (Date.now() - armedAt < 700) return; // a double click is one press, not a yes
     clearTimeout(armed);
     armed = 0;
     button.textContent = label;
@@ -80,7 +86,9 @@ function showSignIn(message = '') {
 
 function showTools() {
   const said = el('p', { class: 'vote-status', role: 'status' });
-  const report = (text: string) => { said.textContent = text; refresh(); };
+  // What just happened, brought into view: the buttons can be a long way down the page.
+  const say = (text: string) => { said.textContent = text; said.scrollIntoView({ block: 'center' }); };
+  const report = (text: string) => { say(text); refresh(); };
   const list = el('div', {});
   const waitingList = el('div', {});
   const minutesBox = (id: string) => el('input', { type: 'number', id, min: '1', max: '1440', value: '15', class: 'minutes' });
@@ -102,6 +110,8 @@ function showTools() {
       waitingList.replaceChildren(el('p', { class: 'muted' }, 'Nothing is waiting.'));
       return;
     }
+    // Oldest first, so a new arrival goes to the bottom and nothing moves under the mouse.
+    items.sort((a, b) => a.id - b.id);
     waitingList.replaceChildren(...items.map((item) => {
       const approve = el('button', { type: 'button', class: 'btn-copy' }, 'Approve');
       approve.addEventListener('click', async () => {
@@ -109,7 +119,7 @@ function showTools() {
         try {
           await call(`/api/community/${item.id}/approve`, 'POST');
           report(`Approved: "${item.purpose}". It is now on the pages.`);
-        } catch (err) { report((err as Error).message); }
+        } catch (err) { approve.disabled = false; report((err as Error).message); }
       });
       return el('div', { class: 'facilitator-row' },
         el('div', { class: 'facilitator-text' },
@@ -131,8 +141,8 @@ function showTools() {
       });
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-      said.textContent = `Backup downloaded: ${all.reactions.length} votes on the chart, ${all.reactions_archive.length} cleared.`;
-    } catch (err) { said.textContent = (err as Error).message; }
+      say(`Backup downloaded: ${all.reactions.length} votes on the chart, ${all.reactions_archive.length} cleared.`);
+    } catch (err) { say((err as Error).message); }
     backup.disabled = false;
   });
 
@@ -165,7 +175,7 @@ function showTools() {
       list,
       el('div', { class: 'facilitator-bulk' },
         el('label', { for: 'flood-minutes' }, 'A flood? Remove everything added in the last'), floodMinutes, el('span', {}, 'minutes'),
-        careful('Remove them all', 'Sure? Remove them all', async () => {
+        careful('Remove them all', () => `Sure? Remove all from the last ${minutesOf(floodMinutes)} minutes, approved or not`, async () => {
           const out = await call<{ removed: number }>('/api/community/remove-recent', 'POST', { minutes: minutesOf(floodMinutes) });
           return `Removed ${out.removed} ${out.removed === 1 ? 'entry' : 'entries'}.`;
         }, report))),
@@ -175,7 +185,7 @@ function showTools() {
       el('p', { class: 'muted' }, 'For undoing a burst of fake votes. Cleared votes leave the chart for good, but they are kept in an archive and are in the backup below. There is no need to clear the chart between workshops.'),
       el('div', { class: 'facilitator-bulk' },
         el('label', { for: 'vote-minutes' }, 'Clear votes cast in the last'), voteMinutes, el('span', {}, 'minutes'),
-        careful('Clear those votes', 'Sure? Clear them', async () => {
+        careful('Clear those votes', () => `Sure? Clear the last ${minutesOf(voteMinutes)} minutes of votes`, async () => {
           const out = await call<{ cleared: number }>('/api/sessions/OPEN/clear-votes', 'POST', { minutes: minutesOf(voteMinutes) });
           return `Cleared ${out.cleared} ${out.cleared === 1 ? 'vote' : 'votes'}.`;
         }, report)),

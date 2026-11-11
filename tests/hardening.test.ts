@@ -90,6 +90,10 @@ describe('removing community prompts', () => {
     expect(await res.json()).toEqual({ removed: 2 });
     expect(await list()).toEqual([]);
   });
+  it('refuses a title made only of invisible characters', async () => {
+    const res = await app.request('/api/community', json('POST', { voter: 'voter-inv1', purpose: '\u200B\u200B\u200B\u200B' }));
+    expect(res.status).toBe(400);
+  });
   it('strips characters that are not text', async () => {
     await share('voter-ctl1', 'Tidy\u0000 notes\u0007', 'line one\nline\u0000 two');
     const item = (await list())[0];
@@ -198,5 +202,15 @@ describe("today's chart", () => {
     expect(b.rows.find((r) => r.id === 'p01')!.happy).toBe(1);
     expect(b.today!.voters).toBe(1);
     expect(b.today!.rows.map((r) => r.id)).toEqual(['p02']);
+  });
+  it("steadies today's scores at the whole chart's average, so a first vote is not a perfect 10", async () => {
+    await db.query("INSERT INTO sessions (code, name, prompt_ids) VALUES ('DAY2', 'Day two', $1)", [['p01', 'p02']]);
+    for (let i = 0; i < 6; i++) await db.query("INSERT INTO reactions (session_code, voter, prompt_id, kind, updated_at) VALUES ('DAY2', $1, 'p01', 'neutral', now() - interval '2 days')", [`voter-okk${i}`]);
+    await app.request('/api/sessions/DAY2/reactions', json('PUT', { voter: 'voter-fst1', promptId: 'p02', kind: 'happy' }));
+    const b = (await (await app.request('/api/sessions/DAY2/board')).json()) as Board;
+    const score = b.today!.rows[0].score!;
+    expect(b.today!.rows.length).toBe(1);
+    expect(score).toBeGreaterThan(6.7); // above the chart's average...
+    expect(score).toBeLessThan(8); // ...but one vote is not a 10
   });
 });

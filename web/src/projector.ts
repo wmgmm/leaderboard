@@ -104,6 +104,7 @@ function draw() {
       rowEls.set(row.id, node);
     }
     node.querySelector('.pos')!.textContent = String(row.pos);
+    node.classList.toggle('top', row.pos === 1); // the winner's colours go with position 1, not with the first row of a view
     // The bar's length is the score, so the bars step down with the chart. Its colours are
     // the split of the votes: green loved it, orange it's OK, red not for me.
     const votes = row.happy + row.neutral + row.sad;
@@ -169,13 +170,16 @@ const isBoard = (b: unknown): b is Board => {
 async function start() {
   const prompts: Prompt[] = await getPrompts();
   titles = new Map(prompts.map((p) => [p.id, p.title] as const));
+  const day = new Date().toDateString();
   try { const last = localStorage.getItem(CACHE); if (last) board = JSON.parse(last); } catch { /* no saved chart */ }
   if (!isBoard(board)) board = null; // a damaged saved chart must not stop the live one
+  // A chart saved on another day: its "today" was that day's, so it is not shown.
+  try { if (board && localStorage.getItem(CACHE + '-day') !== day) delete board.today; } catch { /* fine */ }
   draw();
   watchBoard(code, (latest) => {
     if (!isBoard(latest)) return; // not a chart: keep what is on screen
     board = latest;
-    try { localStorage.setItem(CACHE, JSON.stringify(latest)); } catch { /* fine */ }
+    try { localStorage.setItem(CACHE, JSON.stringify(latest)); localStorage.setItem(CACHE + '-day', new Date().toDateString()); } catch { /* fine */ }
     draw();
   }, (mode) => document.body.setAttribute('data-feed', mode));
   // Community prompts are not part of the live stream, so they are asked for: often

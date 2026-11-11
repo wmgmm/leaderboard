@@ -5,7 +5,7 @@ import type { Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { streamSSE } from 'hono/streaming';
-import { REACTION_POINTS, rankByCounts, sortByScore } from '../shared/ranking';
+import { REACTION_POINTS, averageLiked, rankByCounts, sortByScore } from '../shared/ranking';
 import { shareProblem, tidyPrompt, tidyPurpose } from '../shared/community';
 import { REACTION_KINDS } from '../shared/types';
 import type { Board, CommunityItem, ReactionKind, SessionInfo } from '../shared/types';
@@ -40,7 +40,7 @@ function toInfo(row: SessionRow): SessionInfo {
 // Community prompts appear straight away, with no approval step (Matt's decision,
 // 2026-11-10), so these are the only guards before something is public.
 const SHARES_PER_VOTER_PER_HOUR = 5;
-const SHARES_PER_HOUR = 120; // a couple of workshop rooms, each person suggesting once
+const SHARES_PER_HOUR = 600; // a full room suggesting after every sprint; nothing shows until it is approved
 const COMMUNITY_LIST_MAX = 200;
 const COMMUNITY_ID = /^\d{1,9}$/;
 // The largest honest request is a 1,500-character prompt.
@@ -133,12 +133,15 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
         [session.code, session.promptIds]),
     ]);
     // Today's chart: the same ranking, from today's votes alone, without the prompts nobody voted on today.
-    const today = rankByCounts(session.promptIds, counts.map((r) => ({ promptId: r.prompt_id, kind: r.kind, n: Number(r.today), recent: Number(r.recent) })))
+    const rows = rankByCounts(session.promptIds, counts.map((r) => ({ promptId: r.prompt_id, kind: r.kind, n: Number(r.n), recent: Number(r.recent) })));
+    // Steadied at the whole chart's average, not today's own: the first vote of the day
+    // would otherwise score a perfect 10 or a flat 0.
+    const today = rankByCounts(session.promptIds, counts.map((r) => ({ promptId: r.prompt_id, kind: r.kind, n: Number(r.today), recent: Number(r.recent) })), averageLiked(rows))
       .filter((r) => r.happy + r.neutral + r.sad > 0);
     return {
       session,
       voters: Number(voters[0]?.n ?? 0),
-      rows: rankByCounts(session.promptIds, counts.map((r) => ({ promptId: r.prompt_id, kind: r.kind, n: Number(r.n), recent: Number(r.recent) }))),
+      rows,
       today: { voters: Number(voters[0]?.today ?? 0), rows: today },
     };
   }
@@ -430,6 +433,8 @@ export function createApp(db: Db, facilitatorKey: string, options: AppOptions = 
         while (alive) {
           await stream.sleep(20000);
           if (alive) await stream.writeSSE({ event: 'ping', data: '' }).catch(() => { alive = false; });
+          // The chart again too: "today" moves on at midnight without anybody voting.
+          if (alive) await getBoard(session).then(send, () => {});
         }
       } finally { // however the stream ends, including a database error, the listener goes
         subs.delete(send);

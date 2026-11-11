@@ -43,7 +43,9 @@ function describe(prompt: Prompt): HTMLElement {
   return note;
 }
 
+let stopTags = () => {}; // ends the tag refresh of an earlier drawing of the list
 function showSession(session: SessionInfo, prompts: Prompt[], mine: Record<string, ReactionKind> | null) {
+  stopTags();
   const { state, save } = memory(session.code);
   // What the server says this browser has voted, on this page or in the swipe sprint.
   if (mine) state.votes = mine;
@@ -96,11 +98,15 @@ function showSession(session: SessionInfo, prompts: Prompt[], mine: Record<strin
     const copy = el('button', { class: 'btn-copy', type: 'button' }, 'Copy Prompt');
     const status = el('p', { class: 'vote-status', role: 'status' });
     let note = ''; // one-off message, such as a failed copy or a server error
+    let pressed = { kind: '', at: 0 }; // the last face pressed, to tell a double tap from a change of mind
     const faces = VOTE_FACES.map(({ kind, emoji, label }) => {
       const b = el('button', { class: 'face', type: 'button', 'data-kind': kind },
         el('span', { class: 'face-emoji', 'aria-hidden': 'true' }, emoji),
         el('span', { class: 'face-label' }, label));
       b.addEventListener('click', () => {
+        // A double tap is one vote, not a vote and its removal.
+        if (pressed.kind === kind && Date.now() - pressed.at < 600) return;
+        pressed = { kind, at: Date.now() };
         const before = state.votes[id];
         const next = before === kind ? null : kind; // tap the same face to take it back
         // Counted on the page at once. If the vote server is away the vote waits in the
@@ -195,8 +201,10 @@ function showSession(session: SessionInfo, prompts: Prompt[], mine: Record<strin
   // only about six connections to one site, and a held stream on every tab used them up.
   refreshTags = () => { getBoard(session.code).then(onBoard).catch(() => {}); };
   refreshTags();
-  setInterval(() => { if (!document.hidden) refreshTags(); }, 5000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTags(); });
+  const timer = setInterval(() => { if (!document.hidden) refreshTags(); }, 5000);
+  const onShow = () => { if (!document.hidden) refreshTags(); };
+  document.addEventListener('visibilitychange', onShow);
+  stopTags = () => { clearInterval(timer); document.removeEventListener('visibilitychange', onShow); };
 }
 
 async function start() {
@@ -213,9 +221,21 @@ async function start() {
   let mine: Record<string, ReactionKind> | null = null;
   try {
     // The list must not wait long for the vote server: after 2 seconds it is shown anyway.
+    const asked = Promise.all([getSession(code), getMyVotes(code)]);
     const [found, votes] = await Promise.race([
-      Promise.all([getSession(code), getMyVotes(code)]),
-      new Promise<never>((_, late) => setTimeout(() => late(new Offline('slow')), 2000)),
+      asked,
+      new Promise<never>((_, late) => setTimeout(() => {
+        late(new Offline('slow'));
+        // The answer may still come: draw again with it, so votes cast in the swipe sprint
+        // show, unless the list is already in use (a redraw would shut what is open).
+        let used = false;
+        const use = () => { used = true; };
+        main.addEventListener('pointerdown', use, { once: true });
+        main.addEventListener('keydown', use, { once: true });
+        asked.then(([s, v]) => {
+          if (!used && s && Array.isArray(s.promptIds) && v && typeof v === 'object') showSession(s, prompts, v);
+        }).catch(() => {});
+      }, 2000)),
     ]);
     if (!found || !Array.isArray(found.promptIds)) throw new Offline('Not the vote server.');
     session = found;

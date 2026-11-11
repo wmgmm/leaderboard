@@ -166,6 +166,8 @@ export function flushOutbox(): Promise<void> {
       try {
         await send(job);
       } catch (err) {
+        // Sharing can be paused on its own while voting is not: keep the share, try the rest.
+        if (err instanceof Offline && job.t === 'share') continue;
         if (err instanceof Offline) return; // still away: keep this and the rest
         // refused for a reason of its own (voting closed, say): there is no point retrying
       }

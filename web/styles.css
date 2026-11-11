@@ -328,8 +328,8 @@ a.activity-hero.page:hover { transform: translateY(-2px); }
     display: flex; align-items: center; justify-content: center; width: max(2.5rem, calc(6 * var(--pvh, 1vh))); height: max(2.5rem, calc(6 * var(--pvh, 1vh))); border-radius: 999px;
     border: 2px solid var(--border-soft); font-size: max(1rem, calc(3 * var(--pvh, 1vh))); font-weight: 700; color: var(--apple-text-primary);
 }
-.chart-row:first-child { border-color: var(--apple-blue); }
-.chart-row:first-child .pos { background: var(--apple-blue); border-color: var(--apple-blue); color: #fff; }
+.chart-row.top { border-color: var(--apple-blue); }
+.chart-row.top .pos { background: var(--apple-blue); border-color: var(--apple-blue); color: #fff; }
 .chart-row .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chart-row .tally { display: flex; gap: calc(1.6 * var(--pvw, 1vw)); font-size: max(1rem, calc(2.8 * var(--pvh, 1vh))); font-weight: 600; white-space: nowrap; }
 .chart-row .pct { font-size: max(0.875rem, calc(2.4 * var(--pvh, 1vh))); color: var(--apple-text-primary); min-width: calc(15 * var(--pvh, 1vh)); text-align: right; white-space: nowrap; }
