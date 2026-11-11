@@ -1,0 +1,416 @@
+{
+ "p01": {
+  "about": "Turn a blunt message into an email you can send.",
+  "try": [
+   "Your invoice is wrong again. Fix it.",
+   "No, I can't make another meeting this week.",
+   "We told you this last month."
+  ]
+ },
+ "p02": {
+  "about": "Describe the thing you can't quite remember and get five guesses.",
+  "try": [
+   "that Excel feature that fills a pattern for you",
+   "the law about accessible websites",
+   "a film about a chess prodigy"
+  ]
+ },
+ "p03": {
+  "about": "Learn the essentials of a new topic, fast.",
+  "try": [
+   "procurement rules",
+   "Planner in Teams",
+   "writing a business case"
+  ],
+  "note": "Good for getting started. Your data protection team has the final word."
+ },
+ "p04": {
+  "about": "Describe what you need and get an Excel formula, explained.",
+  "try": [
+   "counts how many names appear more than once",
+   "flags any amount over £500",
+   "shows the latest date for each name"
+  ]
+ },
+ "p05": {
+  "about": "Hear the strongest objections to your idea before your colleagues raise them.",
+  "try": [
+   "switching our team updates from email to Teams",
+   "a four-day working week pilot",
+   "cutting our monthly report to one page"
+  ]
+ },
+ "p06": {
+  "about": "Practise a difficult conversation, with Copilot as your manager. Type DEBRIEF when you're done.",
+  "try": [
+   "say no to extra work",
+   "ask to change my hours",
+   "raise a missed deadline"
+  ]
+ },
+ "p07": {
+  "about": "Get quizzed on any topic, one question at a time.",
+  "try": [
+   "data protection basics",
+   "fire safety basics",
+   "keyboard shortcuts in Outlook"
+  ]
+ },
+ "p08": {
+  "about": "See how four different readers would take your message.",
+  "try": [
+   "an announcement",
+   "a newsletter item",
+   "a policy summary"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload your draft"
+  }
+ },
+ "p09": {
+  "about": "Turn corporate jargon into plain English.",
+  "try": [
+   "a paragraph from a policy",
+   "a letter",
+   "a web page"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload a letter or policy"
+  }
+ },
+ "p10": {
+  "about": "Rewrite any text so a 12-year-old could follow it.",
+  "try": [
+   "a paragraph from a letter",
+   "a web page",
+   "a form"
+  ],
+  "upload": {
+   "icon": "photo",
+   "text": "Or upload a photo of a letter or form"
+  }
+ },
+ "p11": {
+  "about": "Make a cold notice sound warm without changing a single rule.",
+  "try": [
+   "a staff notice",
+   "a reminder email"
+  ]
+ },
+ "p12": {
+  "about": "Get three ways to say no: warm, firm, and not now.",
+  "try": [
+   "a meeting with no agenda",
+   "extra work on a Friday afternoon",
+   "a supplier's sales call"
+  ]
+ },
+ "p13": {
+  "about": "Turn blunt notes into feedback a colleague can take.",
+  "try": [
+   "notes on a presentation",
+   "notes on a report",
+   "notes on a first draft"
+  ]
+ },
+ "p14": {
+  "about": "Turn a rambling voice note into a short, clear email.",
+  "try": [],
+  "upload": {
+   "icon": "mic",
+   "text": "Click the microphone (Start Dictation) and speak"
+  }
+ },
+ "p15": {
+  "about": "Turn technical text into a 100-word summary for the public.",
+  "try": [
+   "a paragraph from a spec",
+   "a report",
+   "a policy"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload the report or spec"
+  }
+ },
+ "p16": {
+  "about": "Translate a sentence and flag what a translator should check.",
+  "try": [
+   "Polish",
+   "Urdu",
+   "a sentence of your own (second bracket)"
+  ],
+  "note": "Official bilingual material still goes through your translation service."
+ },
+ "p17": {
+  "about": "Get ten name ideas, half serious and half playful.",
+  "try": [
+   "our team's monthly awards",
+   "a lunch-and-learn series",
+   "a project to cut paper use"
+  ]
+ },
+ "p21": {
+  "about": "Imagine a project has failed and list the reasons why.",
+  "try": [
+   "our staff conference",
+   "moving to a new office",
+   "the new starter induction"
+  ]
+ },
+ "p22": {
+  "about": "Spot the side effects of a change before you launch it.",
+  "try": [
+   "a new expenses system",
+   "merging two teams",
+   "moving to a paperless office"
+  ]
+ },
+ "p23": {
+  "about": "See what a change gains and what it costs, side by side.",
+  "try": [
+   "closing the office on Fridays",
+   "moving all forms online",
+   "a single shared inbox for the team"
+  ]
+ },
+ "p24": {
+  "about": "Review a plan from three different points of view.",
+  "try": [
+   "a plan to move the team to hot-desking",
+   "a plan to shorten opening hours",
+   "a plan to move a service online"
+  ]
+ },
+ "p25": {
+  "about": "Read your guidance as the person who has to follow it.",
+  "try": [
+   "a paragraph of your own guidance",
+   "the instructions on a form",
+   "joining instructions for an event"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload the guidance"
+  }
+ },
+ "p26": {
+  "about": "Get an honest critique of your writing, with no flattery.",
+  "try": [
+   "a paragraph from a bid",
+   "a report",
+   "a business case"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload your bid or report"
+  }
+ },
+ "p27": {
+  "about": "Find the claims in a proposal to check before you present.",
+  "try": [
+   "a sentence or two from a proposal",
+   "the summary of a business case"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload the proposal"
+  }
+ },
+ "p28": {
+  "about": "Get three questions that challenge your plan.",
+  "try": [
+   "a new mentoring scheme",
+   "an open day",
+   "our team's away day"
+  ]
+ },
+ "p29": {
+  "about": "Get asked the one key question before any answers.",
+  "try": [
+   "our plan to move training online",
+   "our plan to merge two newsletters",
+   "our plan to change the rota"
+  ],
+  "note": "Answer it, then type \"next question\" to keep going."
+ },
+ "p30": {
+  "about": "Get weighted criteria for comparing options or suppliers.",
+  "try": [
+   "a new HR system",
+   "a catering supplier",
+   "a training provider"
+  ]
+ },
+ "p31": {
+  "about": "Work out why you keep putting a task off, and how to start.",
+  "try": [
+   "updating our team's procedures",
+   "clearing my inbox",
+   "preparing my appraisal"
+  ]
+ },
+ "p34": {
+  "about": "Get one idea explained for a child, a colleague and an expert.",
+  "try": [
+   "how our budget is set",
+   "what a DPIA is",
+   "how inflation affects pay"
+  ]
+ },
+ "p35": {
+  "about": "Get an everyday comparison that makes a technical idea stick.",
+  "try": [
+   "what an API is",
+   "how pension contributions work",
+   "why backups matter"
+  ],
+  "note": "Then ask: \"Where does this analogy break down?\""
+ },
+ "p36": {
+  "about": "Answer five questions and get a draft written from your answers.",
+  "try": [
+   "a job description",
+   "a case study for our newsletter",
+   "a handover note for my cover"
+  ]
+ },
+ "p37": {
+  "about": "Turn any task into a step-by-step checklist.",
+  "try": [
+   "closing the office for Christmas",
+   "preparing for an audit",
+   "running a hybrid meeting"
+  ]
+ },
+ "p38": {
+  "about": "Get a first-draft procedure, with steps to check flagged.",
+  "try": [
+   "reporting a data breach",
+   "booking travel",
+   "ordering new equipment"
+  ]
+ },
+ "p39": {
+  "about": "Get a case study outline with gaps where the figures go.",
+  "try": [
+   "a team moving to a shared inbox",
+   "a department cutting paper use",
+   "a service extending its opening hours"
+  ]
+ },
+ "p41": {
+  "about": "Pull the decisions and actions out of messy meeting notes.",
+  "try": [
+   "notes from a team meeting",
+   "notes from a project catch-up",
+   "your own scribbles"
+  ],
+  "note": "Swap real names for roles or initials before you paste.",
+  "upload": {
+   "icon": "photo",
+   "text": "Or upload a photo of your notes or whiteboard"
+  }
+ },
+ "p42": {
+  "about": "Turn rough project notes into a log of risks and issues.",
+  "try": [
+   "your own project notes",
+   "notes from a kick-off meeting"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload your notes as a Word document or PDF"
+  }
+ },
+ "p43": {
+  "about": "Turn a list of topics into a timed meeting agenda.",
+  "try": [
+   "the items for your next team meeting"
+  ]
+ },
+ "p44": {
+  "about": "Find the tasks that stop when one person is off.",
+  "try": [
+   "your own team's weekly tasks"
+  ]
+ },
+ "p45": {
+  "about": "Find the vague wording in a brief, with clearer rewrites.",
+  "try": [
+   "a paragraph from a brief",
+   "a job advert",
+   "a set of instructions"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload the brief"
+  }
+ },
+ "p46": {
+  "about": "Get a tighter summary by telling Copilot what to leave out.",
+  "try": [
+   "your organisation's strategy",
+   "an Act you work with",
+   "a published report"
+  ],
+  "note": "A summary is a starting point. Check the Act itself before you rely on it.",
+  "upload": {
+   "icon": "file",
+   "text": "Or upload a strategy or report"
+  }
+ },
+ "p47": {
+  "about": "Sort survey comments into themes, in a fixed layout.",
+  "try": [
+   "survey comments",
+   "feedback from an event",
+   "consultation responses"
+  ],
+  "note": "Remove names and anything that identifies a person first.",
+  "upload": {
+   "icon": "sheet",
+   "text": "Or upload a spreadsheet of comments"
+  }
+ },
+ "p54": {
+  "about": "Get a short briefing with a source and a date on every point.",
+  "try": [
+   "UK GDPR",
+   "workplace accessibility rules",
+   "AI rules in the UK"
+  ],
+  "note": "Click the sources. Some will be weak or out of date."
+ },
+ "p55": {
+  "about": "Compare a web-search answer with one from Copilot's memory.",
+  "try": [
+   "How long can we keep personal data?",
+   "What are the rules on flexible working requests?"
+  ],
+  "note": "Click a link in the first answer and check it says what Copilot claims."
+ },
+ "p57": {
+  "about": "See what Copilot does when you ask about something it cannot see.",
+  "try": [
+   "our last board paper",
+   "my emails from this morning"
+  ],
+  "note": "In Copilot Chat a good answer admits it has no access. A bad one makes things up."
+ },
+ "p58": {
+  "about": "Test whether Copilot can quote the law word for word. It often cannot.",
+  "try": [
+   "the Data Protection Act 2018",
+   "the Health and Safety at Work etc. Act 1974"
+  ],
+  "note": "Check every quote and section number on legislation.gov.uk."
+ },
+ "p59": {
+  "about": "Give Copilot a logic puzzle and see whether it spots the catch.",
+  "try": [],
+  "note": "The catch: this rota is impossible. A good answer says so; many draw a neat table that breaks the rules."
+ }
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.data/
+.env
+
+# Private working notes: kept on Matt's machine, never published (Matt, 10 Nov 2026).
+TODO.md
+CLAUDE.md
+deliverables/
+docs/

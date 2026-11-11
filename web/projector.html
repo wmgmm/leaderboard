@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Matts - Community Top of the Prompts: the chart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="projector">
+    <!-- The same warm banner that links here from the workshop page, so the two match. -->
+    <header class="activity-hero community">
+        <div class="hero-glass">
+            <div class="hero-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 21h8"/>
+                    <path d="M12 17v4"/>
+                    <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/>
+                    <path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 4"/>
+                    <path d="M17 6h2.5a2.5 2.5 0 0 1-2.5 4"/>
+                </svg>
+            </div>
+            <div class="hero-content">
+                <span class="hero-eyebrow">Community Activity · Live vote</span>
+                <h1 class="hero-title">Community Top of the Prompts</h1>
+                <span class="hero-desc">Vote for the prompts that worked for you and watch the leaderboard move.</span>
+            </div>
+            <p id="meta" class="hero-count">Tuning in...</p>
+        </div>
+    </header>
+    <main>
+        <nav id="filters" aria-label="Chart views"></nav>
+        <ol id="chart"></ol>
+    </main>
+    <script src="projector.js"></script>
+</body>
+</html>

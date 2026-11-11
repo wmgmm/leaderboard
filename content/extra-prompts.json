@@ -1,0 +1,411 @@
+[
+ {
+  "id": "x01",
+  "category": "Just for you",
+  "source": "sprint 83",
+  "title": "Plan a Trip",
+  "text": "Plan [a 3-day trip to Edinburgh for two adults on about £400]. Give a day-by-day plan mixing sights and downtime, with one rainy-day option.",
+  "about": "Get a day-by-day trip plan, with a rainy-day option.",
+  "try": [
+   "a weekend in Tenby with two children",
+   "four days in Lisbon on a budget",
+   "two days in Bath by train"
+  ]
+ },
+ {
+  "id": "x02",
+  "category": "Just for you",
+  "source": "sprint 121",
+  "title": "Choosing Wine",
+  "text": "I'm serving [roast lamb with rosemary]. Suggest three drinks to go with it: a red, a white and one alcohol-free. Explain why each works.",
+  "about": "Find a drink to match tonight's dinner.",
+  "try": [
+   "a vegetable curry",
+   "fish and chips",
+   "a cheeseboard"
+  ]
+ },
+ {
+  "id": "x03",
+  "category": "Just for you",
+  "source": "sprint 72",
+  "title": "Dinner from the Fridge",
+  "text": "I have [eggs, spinach, half an onion, cheddar and a tin of tomatoes]. Give me three dinner ideas with prep time and steps.",
+  "about": "Get three dinner ideas from what's in your fridge.",
+  "try": [
+   "what's left in your own fridge"
+  ],
+  "upload": {
+   "icon": "photo",
+   "text": "Or upload a photo of your fridge"
+  }
+ },
+ {
+  "id": "x04",
+  "category": "Just for you",
+  "source": "sprint 95",
+  "title": "What to Watch Next",
+  "text": "I liked [Slow Horses and Line of Duty]. Suggest five similar titles and say why I'd like each.",
+  "about": "Get five recommendations based on what you already love.",
+  "try": [
+   "two books you loved",
+   "a podcast and a film",
+   "your favourite box set"
+  ]
+ },
+ {
+  "id": "x05",
+  "category": "Just for you",
+  "source": "sprint 94",
+  "title": "Make a Complaint",
+  "text": "Draft a complaint to [my broadband provider about three engineer visits that never happened]. Say what happened, what I've tried and what I want. Firm but polite, under 200 words.",
+  "about": "Get a firm, polite complaint written for you.",
+  "try": [
+   "a courier about a parcel left in the rain",
+   "a shop about a faulty kettle",
+   "a train company about a cancelled service"
+  ]
+ },
+ {
+  "id": "x07",
+  "category": "Just for you",
+  "source": "sprint 11",
+  "title": "Reality TV Voiceover",
+  "text": "Write a one-minute reality TV voiceover narrating [the office fridge being cleared out] as high drama. Include one confessional-booth quote and end on a cliffhanger.",
+  "about": "Get an ordinary moment narrated as high drama. Just for fun.",
+  "try": [
+   "the queue for the microwave",
+   "a printer jam",
+   "choosing where to go for the team lunch"
+  ]
+ },
+ {
+  "id": "x08",
+  "category": "Learn and explain",
+  "source": "sprint 54",
+  "title": "What Could Copilot Do for My Job?",
+  "text": "I'm [a team administrator]. Suggest five tasks Copilot could speed up, with an example prompt for each. Flag anything I shouldn't paste in.",
+  "about": "Get five ways Copilot could help with your job.",
+  "try": [
+   "a finance assistant",
+   "an IT support technician",
+   "a lecturer"
+  ]
+ },
+ {
+  "id": "x09",
+  "category": "Write and rewrite",
+  "source": "sprint 120",
+  "title": "This Could Have Been an Email",
+  "text": "Turn this meeting agenda into an update email people can reply to by 5pm: [budget update, new rota, office move].",
+  "about": "Turn a meeting agenda into an update email instead.",
+  "try": [
+   "the agenda for your next team meeting"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload the agenda"
+  }
+ },
+ {
+  "id": "x10",
+  "category": "Learn and explain",
+  "source": "sprint 73",
+  "title": "Fix My Prompt",
+  "text": "My prompt didn't give me what I wanted. Rewrite it so that it does. Give me the improved prompt first, then a short list of what you changed and why.\nMy prompt: [PASTE YOUR PROMPT]\nWhat I got: [PASTE THE REPLY, OR DESCRIBE IT]\nWhat I wanted: [DESCRIBE A GOOD ANSWER]",
+  "about": "Paste your prompt, what you got and what you wanted. Get a better prompt back.",
+  "try": [],
+  "note": "Test the new prompt in a new chat."
+ },
+ {
+  "id": "x11",
+  "category": "Write and rewrite",
+  "source": "sprint 97",
+  "title": "Plain-English Small Print",
+  "text": "Put this clause into plain English: [The tenant shall indemnify the landlord against all claims arising from the tenant's use of the premises.] Tell me what I must do, what I can't do, and any risk.",
+  "about": "Get a contract clause explained in plain English.",
+  "try": [
+   "a line from a contract",
+   "a clause from terms and conditions",
+   "a paragraph from a tenancy agreement"
+  ],
+  "note": "Good for understanding. It is not legal advice.",
+  "upload": {
+   "icon": "photo",
+   "text": "Or upload a photo of the small print"
+  }
+ },
+ {
+  "id": "x12",
+  "category": "Learn and explain",
+  "source": "sprint 5",
+  "title": "How Do I Do That?",
+  "text": "Give me step-by-step instructions to [set up an out-of-office reply in Outlook]. Name the exact menus and buttons, and suggest one shortcut.",
+  "about": "Get step-by-step instructions for any app.",
+  "try": [
+   "freeze the top row in Excel",
+   "schedule a Teams meeting for a group",
+   "add page numbers in Word"
+  ],
+  "note": "Menus change. If a step doesn't match your screen, tell Copilot what you see.",
+  "upload": {
+   "icon": "photo",
+   "text": "Or upload a screen grab"
+  }
+ },
+ {
+  "id": "x13",
+  "category": "Organise information",
+  "source": "sprint 8",
+  "title": "Sort My To-Do List",
+  "text": "I have these tasks: [finish the budget report, book the training room, reply to 40 emails, plan next year's away day]. Sort them into Do, Decide, Delegate or Delete, and say why.",
+  "about": "Sort your tasks into do, decide, delegate or delete.",
+  "try": [
+   "your own to-do list for this week"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload a meeting transcript"
+  }
+ },
+ {
+  "id": "x14",
+  "category": "Think it through",
+  "source": "sprint 47",
+  "title": "Ten Odd Ideas",
+  "text": "Give me ten unconventional ideas to solve [low turnout at our staff events]. One sentence each, plus a first step.",
+  "about": "Get ten unusual ideas for a problem, each with a first step.",
+  "try": [
+   "a messy shared drive",
+   "nobody reading the newsletter",
+   "queues at the front desk"
+  ]
+ },
+ {
+  "id": "x15",
+  "category": "Data and code",
+  "source": "sprint 21",
+  "title": "Build a Tiny Web Page",
+  "text": "Build a single-file web page that [counts down the days to my next holiday]. I'm not a developer: give me the complete code and tell me exactly how to open it.",
+  "about": "Build a small working web page without knowing any code.",
+  "try": [
+   "shows a random lunch idea when I click a button",
+   "works out how many days until Friday",
+   "splits a bill between friends"
+  ],
+  "note": "Save the code as a file ending .html, then double-click it."
+ },
+ {
+  "id": "x16",
+  "category": "Data and code",
+  "source": "sprint 63",
+  "title": "Why Is My Formula Broken?",
+  "text": "My Excel formula gives an error: [=VLOOKUP(A2,Sheet2!A:B,3,FALSE) shows #REF!]. Explain why in plain English and give me the corrected formula.",
+  "about": "Find out why a formula is failing and get it fixed.",
+  "try": [
+   "a formula of your own and the error it shows"
+  ],
+  "upload": {
+   "icon": "photo",
+   "text": "Or upload a screen grab of the error"
+  }
+ },
+ {
+  "id": "x17",
+  "category": "Data and code",
+  "source": "sprint 113",
+  "title": "Made-Up Test Data",
+  "text": "Make a table of 10 made-up [customers with a name, email, region and amount spent] for testing. Make them look realistic but clearly fake: use @example.com for any email.",
+  "about": "Get realistic made-up data for testing.",
+  "try": [
+   "library books with a title, author and due date",
+   "job applicants with a name, role and interview date",
+   "orders with a product, price and delivery date"
+  ]
+ },
+ {
+  "id": "x18",
+  "category": "Data and code",
+  "source": "sprint 118",
+  "title": "Pull Details Out of a Mess",
+  "text": "Pull the name, email and phone number of each person out of this text and put them in a table: [Hi, it's Sam Example here, you can get me on 029 2018 0123 or sam@example.com. My colleague Alex Sample is on alex@example.com.] Write \"Not given\" where something is missing.",
+  "about": "Pull names, emails and phone numbers out of messy text.",
+  "try": [
+   "a made-up email signature",
+   "made-up notes from a phone call"
+  ],
+  "note": "Practise with made-up details, not real people's."
+ },
+ {
+  "id": "x19",
+  "category": "Data and code",
+  "source": "sprint 123",
+  "title": "Spot the Odd One Out",
+  "text": "Flag anything that looks odd in this list and say why: [Expense claims: Train £42.50, Lunch £8.20, Train £42.50, Taxi £18, Lunch £820, Parking £6].",
+  "about": "Find the entries in a list that don't look right.",
+  "try": [
+   "a column of your own figures",
+   "a list of dates",
+   "mileage claims"
+  ],
+  "upload": {
+   "icon": "sheet",
+   "text": "Or upload a spreadsheet of figures"
+  }
+ },
+ {
+  "id": "x20",
+  "category": "Learn and explain",
+  "source": "Matt, 11 Nov 2026",
+  "title": "Simplified Technical English",
+  "text": "Explain this [TOPIC/TEXT/DOCUMENT] at about 80% of the way to ASD-STE100 Simplified Technical English.\nUse short sentences. Use active voice. One idea per sentence.\nUse simple, common words.\nExplain technical terms the first time they appear.\nGive steps in order, one action per step.",
+  "about": "Get anything explained in short, simple, step-by-step English.",
+  "try": [
+   "a policy",
+   "a set of instructions",
+   "a technical term"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Or upload the document"
+  }
+ },
+ {
+  "id": "x21",
+  "category": "Learn and explain",
+  "source": "Matt, 11 Nov 2026 (meta-prompting)",
+  "title": "Write the Prompt for Me",
+  "text": "I want Copilot to help me [write a monthly update for my team]. Write the best prompt for that. Include a role, the context you need from me and the format. Mark the gaps I need to fill in CAPITALS.",
+  "about": "Say what you want and get Copilot to write the prompt.",
+  "try": [
+   "plan a training session",
+   "summarise long reports",
+   "reply to complaints"
+  ],
+  "note": "Copy the prompt it writes into a new chat to use it."
+ },
+ {
+  "id": "x22",
+  "category": "Learn AI's limits",
+  "source": "Matt, 11 Nov 2026 (meta-prompting)",
+  "title": "Mark Your Own Work",
+  "text": "Check [your last answer]. List anything that was guessed, anything that could be out of date, and the one thing I should verify myself. Then give me a corrected version.",
+  "about": "Get Copilot to check an answer for guesses and out-of-date facts.",
+  "try": [
+   "this answer (paste it into a new chat)"
+  ],
+  "note": "Run it in the same chat, then in a new chat with the answer pasted in. A new chat isn't anchored to its own words."
+ },
+ {
+  "id": "x23",
+  "category": "Learn and explain",
+  "source": "Matt, 11 Nov 2026 (role prompting)",
+  "title": "Socratic Tutor",
+  "text": "Act as a Socratic tutor. I want to understand [how compound interest works]. Don't explain it or give me the answer. Ask me one question at a time, wait for my reply, and build on what I say. If I get stuck twice, give me a hint, not the answer. When I type DONE, tell me what I now understand and what to look at next.",
+  "about": "Learn a topic by being asked questions, not told the answers. Type DONE when you've had enough.",
+  "try": [
+   "what a pivot table does",
+   "how AI chatbots choose the next word",
+   "the difference between mean and median"
+  ]
+ },
+ {
+  "id": "x24",
+  "category": "Think it through",
+  "source": "Matt, 11 Nov 2026 (role prompting)",
+  "title": "Your Executive Coach",
+  "text": "Act as an experienced executive coach. I want to work on [delegating more instead of doing everything myself]. Use the GROW model: my goal, where I am now, my options, and what I will do. Ask one question at a time and wait for my answer. Challenge vague answers, and don't give advice unless I ask for it. When I type WRAP UP, summarise my goal and my next three actions.",
+  "about": "Get coached through a work challenge, one question at a time. Type WRAP UP to finish.",
+  "try": [
+   "preparing for a promotion interview",
+   "managing my time better",
+   "speaking up more in meetings"
+  ],
+  "note": "Keep it about you. Leave out colleagues' names and details."
+ },
+ {
+  "id": "x25",
+  "category": "Data and code",
+  "source": "Matt, 11 Nov 2026",
+  "title": "Learn SQL on Your Own Tables",
+  "text": "Act as a patient SQL tutor. Here is my table: [orders(order_id, customer_name, order_date, region, amount)]. Set me five practice questions on it, easiest first, one at a time. Wait for my query each time. Then say what is right, fix what is wrong, and explain the correct query clause by clause.",
+  "about": "Practise SQL on your own table, with feedback on every query.",
+  "try": [
+   "staff(staff_id, name, department, start_date)",
+   "a CREATE TABLE statement of your own"
+  ],
+  "note": "Paste the column names only, never the data in the table."
+ },
+ {
+  "id": "x26",
+  "category": "Data and code",
+  "source": "Matt, 11 Nov 2026",
+  "title": "Explore a Spreadsheet",
+  "text": "I've uploaded [a spreadsheet of this year's training bookings]. First, list each column, what it holds, and any blanks or odd values. Then give me the three most useful findings, such as trends, outliers or gaps. For each one, say which columns you used and how you worked it out. Finish with three questions I should ask next.",
+  "about": "Upload an Excel file and get its columns, key findings and next questions.",
+  "try": [
+   "a budget tracker",
+   "survey results",
+   "an equipment list"
+  ],
+  "upload": {
+   "icon": "sheet",
+   "text": "Upload your Excel file first"
+  },
+  "note": "Remove names and personal details before you upload. Check its sums against the file."
+ },
+ {
+  "id": "x27",
+  "category": "Data and code",
+  "source": "Matt, 11 Nov 2026",
+  "title": "Check My Spreadsheet",
+  "text": "I've uploaded [a spreadsheet of expense claims]. Act as a careful data checker. Look for duplicates, blanks, typos, mixed formats (such as dates or numbers stored as text), totals that don't add up and values that look out of range. Give me a table: Problem, Where (sheet, column, row), Why it matters, Suggested fix. Don't change anything, and tell me if you couldn't read part of the file.",
+  "about": "Upload an Excel file and get a list of errors to fix.",
+  "try": [
+   "a contact list",
+   "a budget tracker",
+   "a booking log"
+  ],
+  "upload": {
+   "icon": "sheet",
+   "text": "Upload your Excel file first"
+  },
+  "note": "Remove personal details before you upload. Spot-check a few of the rows it flags."
+ },
+ {
+  "id": "x28",
+  "category": "Think it through",
+  "source": "Matt, 11 Nov 2026",
+  "title": "Check My Work",
+  "text": "Act as a careful reviewer. Check [the report I've uploaded] before I send it. Look for numbers or dates that don't agree with each other, claims with no evidence, missing steps and anything unclear. Give me a table: Issue, Where, Why it matters, Fix. Mark each one Must fix or Nice to fix. Don't rewrite it.",
+  "about": "Get a piece of work checked for errors and gaps before you send it.",
+  "try": [
+   "this email (paste it in)",
+   "the slides I've uploaded",
+   "this business case"
+  ],
+  "upload": {
+   "icon": "file",
+   "text": "Upload the document, or paste the text"
+  },
+  "note": "Use a new chat: one that helped write the work goes easy on it. It still won't spot everything, so the final check is yours."
+ },
+ {
+  "id": "x29",
+  "category": "Data and code",
+  "source": "Matt, 11 Nov 2026",
+  "title": "Themes in Free-Text Feedback",
+  "text": "I've uploaded [an Excel file of comments from our staff survey]. Use Python code to read every comment in the free-text column, so the counts are real. Group the comments into themes. Give me a table: Theme, Number of comments, Typical quote. Then list the top three issues, the top three things people liked, and two insights I might miss. Tell me how many comments you read.",
+  "about": "Upload feedback comments and get themes, issues, positives and insights, with counts.",
+  "try": [
+   "course evaluation comments",
+   "event feedback",
+   "helpdesk comments"
+  ],
+  "upload": {
+   "icon": "sheet",
+   "text": "Upload your Excel file first"
+  },
+  "note": "Remove names and anything that identifies a person first. Check the counts against the file."
+ }
+]
